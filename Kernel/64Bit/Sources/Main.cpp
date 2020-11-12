@@ -21,7 +21,7 @@ MGE2Njc1NjM2YjVmNmQ3OTVmNmM2OTY2NjU1ZjczNjM3MjY1Nzc1ZjY5NzQ1ZjY5NWY3NzYxNmU2ZTYx
 extern "C" void Main(void) {
     WINDOW *Window;
     Hal::InitSystem();
-    Window = Window::CreateWindow("Hello world" , WINDOW_FLAGS_DEFAULT , 100 , 100 , 400 , 250 , RGB(0 , 0 , 255));
+    Window = Window::CreateWindow("Hello world" , WINDOW_FLAGS_DEFAULT , 100 , 100 , 400 , 250 , RGB(255 , 255 , 255));
     while(1) {
     	;
     }

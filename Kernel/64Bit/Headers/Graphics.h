@@ -6,8 +6,8 @@
 #include <Layer.h>
 
 #define VBEMODEINFOBLOCK_STARTADDRESS 0x4000
-#define GRAPHICS_MOUSE_WIDTH 32
-#define GRAPHICS_MOUSE_HEIGHT 32
+#define GRAPHICS_MOUSE_WIDTH 12
+#define GRAPHICS_MOUSE_HEIGHT 12
 #define RGB(Red , Green , Blue) (((BYTE)((Red) >> 3) << 11)|((BYTE)((Green) >> 2) << 5)|((BYTE)((Blue) >> 3)))
 
 namespace Graphics {

@@ -10,8 +10,7 @@
 #define KERNEL64_SECTOR_COUNT 32
 
 #define KERNEL64_STACKSIZE 0x800000
-#define VBEMODE 0x111
-#define GRAPHICMODE 0x01
+#define VBEMODE 0x117
 
 #pragma pack(push , 1)
 
@@ -65,6 +64,7 @@ void Main32(unsigned long MultibootMagic , unsigned long MultibootAddress) {
     BYTE *TextScreenBuffer = (BYTE*)0xB8000;
     DWORD RAMSize;
     REGISTERS Registers;
+    char *Buffer = (char*)0xACACAC;
     while(i --> 0) {
         *TextScreenBuffer++ = 0x00;
         *TextScreenBuffer++ = 0x07;
@@ -81,17 +81,16 @@ void Main32(unsigned long MultibootMagic , unsigned long MultibootAddress) {
             ;
         }
     }
-    if(GRAPHICMODE == 0x01) {
-        Registers.AX = 0x4F01;
-        Registers.CX = VBEMODE;
-        Registers.ES = 0x400;
-        Registers.DI = 0x00;
-        int32(0x10 , &(Registers));
+    Buffer[0] = 0xFF;
+    Registers.AX = 0x4F01;
+    Registers.CX = VBEMODE;
+    Registers.ES = 0x400;
+    Registers.DI = 0x00;
+    int32(0x10 , &(Registers));
 
-        Registers.AX = 0x4F02;
-        Registers.BX = VBEMODE+0x4000;
-        int32(0x10 , &(Registers));
-    }
+    Registers.AX = 0x4F02;
+    Registers.BX = VBEMODE+0x4000;
+    int32(0x10 , &(Registers));
 
 
     InitPML4(0x16000);

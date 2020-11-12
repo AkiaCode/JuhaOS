@@ -33,7 +33,7 @@ void Window::Initialize(void) {
     WindowManager.BackgroundWindow = CreateSystemWindow("Background window" , 0 , 0 , Block->Width , Block->Height , 0x00 , FALSE);
     Graphics::DrawRectangle(WindowManager.BackgroundWindow->Layer , 0 , 0 , Block->Width , Block->Height , WINDOW_DEFAULTWALLPAPERCOLOR , TRUE);
     Task::CreateTask((QWORD)MouseWindow , TASK_SYSTEM , "MouseTask" , "Task for Mouse system(GUI)");
-    delay(1000);
+    delay(50);
 }
 
 WINDOW *Window::CreateWindow(const char *Title , WORD Flags , int X , int Y , int Width , int Height , WORD BackgroundColor) {
@@ -46,11 +46,11 @@ WINDOW *Window::CreateWindow(const char *Title , WORD Flags , int X , int Y , in
 	}
 	WindowManager.Windows[i].Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
 	WindowManager.Windows[i].Layer = CreateLayer(WindowManager.Windows[i].Buffer , Width , Height , WINDOW_INVISIBLECOLOR);
-	ChangeLayerHeight(WindowManager.Windows[i].Layer , WindowManager.WindowsCount);
 	if(Flags == WINDOW_FLAGS_DEFAULT) {
 		Graphics::DrawWindow(WindowManager.Windows[i].Layer , 0 , 0 , Width , Height , Title , BackgroundColor , FALSE);
 	}
-	if((Flags & WINDOW_FLAGS_NO_BACKGROUND) == WINDOW_FLAGS_NO_TITLEBAR) {
+	if((Flags & WINDOW_FLAGS_NO_BACKGROUND) == WINDOW_FLAGS_NO_BACKGROUND) {
+		ChangeLayerHeight(WindowManager.Windows[i].Layer , WindowManager.WindowsCount);
 		MoveLayer(WindowManager.Windows[i].Layer , X , Y);
 		WindowManager.WindowsCount++;
 		return &(WindowManager.Windows[i]);
@@ -58,6 +58,7 @@ WINDOW *Window::CreateWindow(const char *Title , WORD Flags , int X , int Y , in
 	if((Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR) {
 		Graphics::DrawRectangle(WindowManager.Windows[i].Layer , 0 , 0 , Width , Height , BackgroundColor , FALSE);
 	}
+	ChangeLayerHeight(WindowManager.Windows[i].Layer , WindowManager.WindowsCount);
 	MoveLayer(WindowManager.Windows[i].Layer , X , Y);
 	WindowManager.WindowsCount++;
 	return &(WindowManager.Windows[i]);
