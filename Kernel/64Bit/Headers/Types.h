@@ -9,6 +9,8 @@ typedef unsigned long long int QWORD;
 typedef unsigned int size_t;
 typedef int BOOL;
 
+typedef signed short VIDEOMEMORY;
+
 #define OS_VERSION "0.1.2"
 
 #define TRUE 1

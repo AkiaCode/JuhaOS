@@ -26,7 +26,8 @@ Task.obj \
 RAMDisk.obj \
 FAT32.obj \
 Graphics.obj \
-WindowSystem.obj
+WindowSystem.obj \
+Layer.obj
 ENTRYFILE = Entry.asm
 ASSEMBLYFILE = Assembly.asm
 

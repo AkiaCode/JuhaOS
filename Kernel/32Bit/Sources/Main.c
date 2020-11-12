@@ -10,7 +10,7 @@
 #define KERNEL64_SECTOR_COUNT 32
 
 #define KERNEL64_STACKSIZE 0x800000
-#define VBEMODE 0x117 // 1280x1080
+#define VBEMODE 0x111
 #define GRAPHICMODE 0x01
 
 #pragma pack(push , 1)
@@ -92,6 +92,7 @@ void Main32(unsigned long MultibootMagic , unsigned long MultibootAddress) {
         Registers.BX = VBEMODE+0x4000;
         int32(0x10 , &(Registers));
     }
+
 
     InitPML4(0x16000);
     LoadModule(0 , 0x7C00 , MultibootAddress);

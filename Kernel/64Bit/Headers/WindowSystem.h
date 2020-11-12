@@ -2,53 +2,40 @@
 #define _WINDOWSYSTEM_H_
 
 #include <Types.h>
+#include <Layer.h>
 #include <Graphics.h>
 
-#define WINDOW_BACKGROUNDID 0x400000
-#define WINDOW_MAXCOUNT 1024
-#define WINDOW_NONE 0
-#define WINDOW_HIDE 1
-#define WINDOW_TITLEBAR 2
+#define WINDOW_FLAGS_DEFAULT 0x01
+#define WINDOW_FLAGS_NO_TITLEBAR 0x02
+#define WINDOW_FLAGS_NO_BACKGROUND 0x04
+#define WINDOW_MAXCOUNT 512
 
 #define WINDOW_TITLECOLOR RGB(0 , 51 , 153)
 #define WINDOW_DEFAULTBACKGROUND RGB(0xFF , 0xFF , 0xFF)
 #define WINDOW_DEFAULTWALLPAPERCOLOR RGB(103 , 153 , 255)
+#define WINDOW_INVISIBLECOLOR 0x01
 
+typedef struct {
+	BOOL Using;
+	WORD *Buffer;
+	LAYER *Layer;
+}WINDOW;
 
 namespace Window {
-	struct WINDOWINFO {
-	    int X;
-	    int Y;
-	    int Width;
-	    int Height;
-	    int Priority;
-		QWORD ID;
-	    QWORD Flags;
-	    BOOL Using;
-
-	    char Title[128];
-	    WORD *WindowBuffer;
-	};
-
-	class Manager { 
-		friend class Window;
+	class Manager {
 		public:
-			WINDOWINFO Windows[WINDOW_MAXCOUNT];
-			WORD DefaultBackgroundColor;
-			QWORD TopWindowID;
-			QWORD WindowsCount;
+			int WindowsCount;
+			WINDOW Windows[WINDOW_MAXCOUNT];
+			void WindowManagerTask(void);
 
-			WORD *VideoMemory;
-			int Width;
-			int Height;
+			WINDOW *BackgroundWindow;
+			WINDOW *MouseWindow;
 	};
 	void Initialize(void);
-	QWORD CreateWindow(const char *Title , const char *Description , QWORD EntryPoint , QWORD Flags , int X , int Y , int Width , int Height);
-	void MoveWindow(QWORD ID , int X , int Y);
-	WORD *GetCurrentWindowBuffer(void);
-	void Update(void);
-	void UpdateTask(void);
-	void MouseTask(void);
-}
+	void MouseWindow(void);
+	void BackgroundWindow(void);
+	WINDOW *CreateWindow(const char *Title , WORD Flags , int X , int Y , int Width , int Height , WORD Backgroundcolor);
+
+};
 
 #endif
