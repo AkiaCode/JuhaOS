@@ -2,14 +2,10 @@
 #include <Paging.h>
 #include <Assembly.h>
 
-#define KERNEL32_SECTORCOUNT 16
-#define BYTES_PER_SECTOR 512
 #define KERNEL32_STARTADDRESS 0x100000
 #define KERNEL64_REALADDRESS 0x100000+(KERNEL32_SECTORCOUNT*BYTES_PER_SECTOR)
 #define KERNEL64_STARTADDRESS 0x200000
-#define KERNEL64_SECTOR_COUNT 32
 
-#define KERNEL64_STACKSIZE 0x100000
 #define VBEMODE 0x117
 
 #pragma pack(push , 1)
@@ -55,8 +51,6 @@ DWORD CheckMaxMemory(void);
 BOOL Check64BitSupported(void);
 
 void PrintString(int X , int Y , const char *Buffer);
-int strcmp(const char *Destination , const char *Source);
-int strlen(const char *Destination);
 void LoadModule(int Number , DWORD Address , DWORD MultibootAddress);
 
 void Main32(unsigned long MultibootMagic , unsigned long MultibootAddress) {
@@ -121,43 +115,6 @@ void PrintString(int X , int Y , const char *Buffer) {
     for(i = 0; Buffer[i] != '\0'; i++) {
         *(ScreenBuffer++) = Buffer[i];
         *(ScreenBuffer++) = 0x07;
-    }
-}
-
-int strlen(const char *Destination) {
-    int i;
-    for(i = 0; Destination[i] != '\0'; i++) {
-        __asm__ ("nop");
-    }
-    return i;
-}
-
-int strcmp(const char *Destination , const char *Source) {
-    char Dest;
-    char Src;
-    while(1) {
-        Dest = *(Destination)++;
-        Src = *(Source)++;
-        if(Dest != Src) {
-            return 0x01;
-        }
-        if((Dest == '\0')||(Src == '\0')) {
-            break;
-        }
-    }
-    return 0;
-}
-
-void CopyKernelTo64BitArea(void) {
-    const DWORD *Kernel64RealAddress = (DWORD*)KERNEL64_REALADDRESS;
-    DWORD *Kernel64Address = (DWORD*)KERNEL64_STARTADDRESS;
-    while(1) {
-        if(((DWORD)Kernel64RealAddress) == (KERNEL64_SECTOR_COUNT*BYTES_PER_SECTOR)+0xA200) {
-            break;
-        }
-        *(Kernel64Address) = *(Kernel64RealAddress);
-        Kernel64Address++;
-        Kernel64RealAddress++;
     }
 }
 
