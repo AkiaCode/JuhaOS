@@ -1,5 +1,6 @@
 #include <Layer.h>
 #include <MemoryManagement.h>
+#include <Graphics.h>
 
 /* Used Haribote OS source
  * thank you for Kawahi Hidemi
@@ -57,7 +58,8 @@ void UpdateLayerSub(int VX1 , int VY1 , int VX2 , int VY2 , int Height) {
 			VY = Layer->VY1+BY;
 			for(BX = BX1; BX < BX2; BX++) {
 				VX = Layer->VX1+BX;
-				if(Buffer[BY*Layer->BXSize+BX] != Layer->InvisibleColor) {
+				TempBuffer = Buffer[(BY*Layer->BXSize)+BX];
+				if(TempBuffer != Layer->InvisibleColor) {
 					LayerManager->VideoMemory[(VY*LayerManager->Width)+VX] = Buffer[(BY*Layer->BXSize)+BX];
 				}
 			}
@@ -77,7 +79,7 @@ void InitLayerSystem(WORD *VideoMemory , int Width , int Height) {
 	}
 }
 
-LAYER *CreateLayer(WORD *Buffer , int Width , int Height , int InvisibleColor) {
+LAYER *CreateLayer(WORD *Buffer , BOOL InvisibleAreaUsing , int Width , int Height , int InvisibleColor) {
 	int i;
 	LAYER *Layer;
 	for(i = 0; i < LAYER_MAXCOUNT; i++) {

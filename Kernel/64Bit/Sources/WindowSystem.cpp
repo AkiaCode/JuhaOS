@@ -14,7 +14,7 @@ static WINDOW *CreateSystemWindow(const char *Title , int X , int Y , int Width 
 		}
 	}
 	WindowManager.Windows[i].Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
-	WindowManager.Windows[i].Layer = CreateLayer(WindowManager.Windows[i].Buffer , Width , Height , -1);
+	WindowManager.Windows[i].Layer = CreateLayer(WindowManager.Windows[i].Buffer , FALSE , Width , Height , GRAPHICS_MOUSE_INVISIBLECOLOR);
 	ChangeLayerHeight(WindowManager.Windows[i].Layer , Priority);
 	if(Move == TRUE) {
 		MoveLayer(WindowManager.Windows[i].Layer , X , Y);
@@ -45,7 +45,7 @@ WINDOW *Window::CreateWindow(const char *Title , WORD Flags , int X , int Y , in
 		}
 	}
 	WindowManager.Windows[i].Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
-	WindowManager.Windows[i].Layer = CreateLayer(WindowManager.Windows[i].Buffer , Width , Height , WINDOW_INVISIBLECOLOR);
+	WindowManager.Windows[i].Layer = CreateLayer(WindowManager.Windows[i].Buffer , FALSE , Width , Height , WINDOW_INVISIBLECOLOR);
 	if(Flags == WINDOW_FLAGS_DEFAULT) {
 		Graphics::DrawWindow(WindowManager.Windows[i].Layer , 0 , 0 , Width , Height , Title , BackgroundColor , FALSE);
 	}
@@ -74,8 +74,8 @@ void Window::MouseWindow(void) {
     X = (Block->Width-GRAPHICS_MOUSE_WIDTH)/2;
     Y = (Block->Height-GRAPHICS_MOUSE_HEIGHT)/2;
     WindowManager.MouseWindow = CreateSystemWindow("Mouse window" , (Block->Width-GRAPHICS_MOUSE_WIDTH)/2 , (Block->Height-GRAPHICS_MOUSE_HEIGHT)/2 , GRAPHICS_MOUSE_WIDTH , GRAPHICS_MOUSE_HEIGHT , WINDOW_MAXCOUNT-2 , TRUE);
-    Graphics::DrawCursor(WindowManager.MouseWindow->Layer , 0 , 0 , FALSE);
-    UpdateLayer(WindowManager.MouseWindow->Layer , 0 , 0 , GRAPHICS_MOUSE_WIDTH , GRAPHICS_MOUSE_HEIGHT);
+	Graphics::DrawCursor(WindowManager.MouseWindow->Layer , 0 , 0 , TRUE);
+    MoveLayer(WindowManager.MouseWindow->Layer , X , Y);
     while(1) {
         if(Hal::Mouse::GetMouseData(&(DX) , &(DY) , &(Button)) == FALSE) {
         	continue;

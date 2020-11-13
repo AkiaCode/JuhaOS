@@ -19,9 +19,9 @@ typedef struct {
 	int BYSize;
 	int VX1;
 	int VY1;
-	int InvisibleColor;
 	int Height;
 	int Flags;
+	WORD InvisibleColor;
 }LAYER;
 
 typedef struct {
@@ -37,7 +37,7 @@ typedef struct {
 #pragma pack(pop)
 
 void InitLayerSystem(WORD *WORD , int Width , int Height);
-LAYER *CreateLayer(WORD *Buffer , int Width , int Height , int InvisibleColor);
+LAYER *CreateLayer(WORD *Buffer , BOOL InvisibleAreaUsing , int Width , int Height , int InvisibleColor);
 void ChangeLayerHeight(LAYER *Layer , int Height);
 void UpdateLayer(LAYER *Layer , int X1 , int Y1 , int X2 , int Y2);
 void MoveLayer(LAYER *Layer , int X , int Y);

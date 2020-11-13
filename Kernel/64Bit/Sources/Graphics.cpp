@@ -105,6 +105,7 @@ void Graphics::DrawCursor(LAYER *Layer , int X , int Y , BOOL Update) {
 	int i;
 	const int LastX = X;
 	const int LastY = Y;
+	BYTE MouseInvisibleArea[GRAPHICS_MOUSE_WIDTH*GRAPHICS_MOUSE_HEIGHT];
     BYTE MouseCursor[33][33] = {
     	"###           " , 
     	"#@@###        " , 
@@ -121,7 +122,8 @@ void Graphics::DrawCursor(LAYER *Layer , int X , int Y , BOOL Update) {
     	"   #          " , 
     	"              " , 
 	};
-	for(i = 0; i < 32*32; i++) {
+	memset(MouseInvisibleArea , 0 , sizeof(MouseInvisibleArea));
+	for(i = 0; i < GRAPHICS_MOUSE_WIDTH*GRAPHICS_MOUSE_HEIGHT; i++) {
 		switch(MouseCursor[Y-LastY][X-LastX]) {
 			case '0':
 				DrawPixel(Layer , X , Y , RGB(255 , 255 , 255) , Update);
@@ -138,12 +140,14 @@ void Graphics::DrawCursor(LAYER *Layer , int X , int Y , BOOL Update) {
 			case '#':
 				DrawPixel(Layer , X , Y , RGB(0 , 0 , 0) , Update);
 				break;
+			case ' ':
+				DrawPixel(Layer , X , Y , GRAPHICS_MOUSE_INVISIBLECOLOR , Update);
+				break;
 			default:
-				DrawPixel(Layer , X , Y , RGB(255 , 255 , 255) , Update);
 				break;
 		}
 		X++;
-		if(X-LastX >= 32) {
+		if(X-LastX >= Layer->BXSize) {
 			X = LastX;
 			Y++;
 		}

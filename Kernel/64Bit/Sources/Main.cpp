@@ -18,9 +18,18 @@ d25na2RtbCBkbHN0b2RkbXMgcm9ya3hlaw==
 MGE2Njc1NjM2YjVmNmQ3OTVmNmM2OTY2NjU1ZjczNjM3MjY1Nzc1ZjY5NzQ1ZjY5NWY3NzYxNmU2ZTYxNWY3Mzc1Njk2MzY5NjQ2NTVmNzI2OTY3Njg3NDVmNjY3NTYzNmI2OTZlNjc1ZjZlNmY3NzVmM2EyOQ==
 */
 
+void WindowTask(void);
+
 extern "C" void Main(void) {
-    WINDOW *Window;
     Hal::InitSystem();
+    Task::CreateTask((QWORD)WindowTask , TASK_DEFAULT , "WindowTask1" , "");
+    while(1) {
+    	;
+    }
+}
+
+void WindowTask(void) {
+    WINDOW *Window;
     Window = Window::CreateWindow("Hello world" , WINDOW_FLAGS_DEFAULT , 100 , 100 , 400 , 250 , RGB(255 , 255 , 255));
     while(1) {
     	;

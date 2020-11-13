@@ -10,6 +10,8 @@
 #define GRAPHICS_MOUSE_HEIGHT 12
 #define RGB(Red , Green , Blue) (((BYTE)((Red) >> 3) << 11)|((BYTE)((Green) >> 2) << 5)|((BYTE)((Blue) >> 3)))
 
+#define GRAPHICS_MOUSE_INVISIBLECOLOR RGB(42 , 56 , 12)
+
 namespace Graphics {
 	void DrawPixel(LAYER *Layer , int X , int Y , WORD Color , BOOL Update);
 	void DrawLine(LAYER *Layer , int X1 , int Y1 , int X2 , int Y2 , WORD Color , BOOL Update);
