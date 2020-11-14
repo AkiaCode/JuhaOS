@@ -39,8 +39,11 @@ typedef struct {
 void InitLayerSystem(WORD *WORD , int Width , int Height);
 LAYER *CreateLayer(WORD *Buffer , BOOL InvisibleAreaUsing , int Width , int Height , int InvisibleColor);
 void ChangeLayerHeight(LAYER *Layer , int Height);
+void UpdateLayerSub(int VX1 , int VY1 , int VX2 , int VY2);
 void UpdateLayer(LAYER *Layer , int X1 , int Y1 , int X2 , int Y2);
 void MoveLayer(LAYER *Layer , int X , int Y);
 void RemoveLayer(LAYER *Layer);
+int GetTopLayer(void);
+LAYERMANAGER *GetLayerManager(void);
 
 #endif

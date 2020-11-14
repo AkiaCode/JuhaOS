@@ -5,8 +5,7 @@
 #include <string.h>
 
 void Graphics::DrawPixel(LAYER *Layer , int X , int Y , WORD Color , BOOL Update) {
-	VBEMODEINFOBLOCK *Block = (VBEMODEINFOBLOCK*)VBEMODEINFOBLOCK_STARTADDRESS;
-    if((X < 0)||(Y < 0)||(X >= Block->Width)||(Y >= Block->Height)) {
+    if((X < 0)||(Y < 0)||(X >= Layer->BXSize)||(Y >= Layer->BYSize)) {
     	return;
     }
    	Layer->Buffer[(Y*Layer->BXSize)+X] = Color;
@@ -160,7 +159,7 @@ void Graphics::DrawWindow(LAYER *Layer , int X , int Y , int Width , int Height 
 	int i;
 	int j;
 	const int Padding = 2;
-	const int TaskbarSize = 17;
+	const int TaskbarSize = GRAPHICS_WINDOW_TITLEBARSIZE;
 	int XButtonX = X+Width-(Padding*2)-TaskbarSize;
 	int XButtonY = Y+Padding+3;
 

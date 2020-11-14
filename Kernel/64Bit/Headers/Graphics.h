@@ -8,6 +8,7 @@
 #define VBEMODEINFOBLOCK_STARTADDRESS 0x4000
 #define GRAPHICS_MOUSE_WIDTH 12
 #define GRAPHICS_MOUSE_HEIGHT 12
+#define GRAPHICS_WINDOW_TITLEBARSIZE 16
 #define RGB(Red , Green , Blue) (((BYTE)((Red) >> 3) << 11)|((BYTE)((Green) >> 2) << 5)|((BYTE)((Blue) >> 3)))
 
 #define GRAPHICS_MOUSE_INVISIBLECOLOR RGB(42 , 56 , 12)
