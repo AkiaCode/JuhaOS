@@ -9,7 +9,7 @@
 
 static LAYERMANAGER *LayerManager;
 
-void UpdateLayerSub(int VX1 , int VY1 , int VX2 , int VY2) {
+void UpdateLayerSub(int VX1 , int VY1 , int VX2 , int VY2 , int Height) {
 	int i;
 	int BX;
 	int BY;
@@ -35,7 +35,7 @@ void UpdateLayerSub(int VX1 , int VY1 , int VX2 , int VY2) {
 	if(VY2 > LayerManager->Height) {
 		VY2 = LayerManager->Height;
 	}
-	for(i = 0; i <= LayerManager->Top; i++) {
+	for(i = Height; i <= LayerManager->Top; i++) {
 		Layer = LayerManager->Layers[i];
 		Buffer = Layer->Buffer;
 		BX1 = VX1-Layer->VX1;
@@ -124,7 +124,7 @@ void ChangeLayerHeight(LAYER *Layer , int Height) {
 			}
 			LayerManager->Top--;
 		}
-		UpdateLayerSub(Layer->VX1 , Layer->VY1 , Layer->VX1+Layer->BXSize , Layer->VY1+Layer->BYSize);
+		UpdateLayer(Layer , Layer->VX1 , Layer->VY1 , Layer->VX1+Layer->BXSize , Layer->VY1+Layer->BYSize);
 	}
 	else if(OldHeight < Height) {
 		if(OldHeight >= 0) {
@@ -142,13 +142,13 @@ void ChangeLayerHeight(LAYER *Layer , int Height) {
 			LayerManager->Layers[Height] = Layer;
 			LayerManager->Top++;
 		}
-		UpdateLayerSub(Layer->VX1 , Layer->VY1 , Layer->VX1+Layer->BXSize , Layer->VY1+Layer->BYSize);
+		UpdateLayer(Layer , Layer->VX1 , Layer->VY1 , Layer->VX1+Layer->BXSize , Layer->VY1+Layer->BYSize);
 	}
 }
 
 void UpdateLayer(LAYER *Layer , int X1 , int Y1 , int X2 , int Y2) {
 	if(Layer->Height >= 0) {
-		UpdateLayerSub(Layer->VX1+X1 , Layer->VY1+Y1 , Layer->VX1+X2 , Layer->VY1+Y2);
+		UpdateLayerSub(Layer->VX1+X1 , Layer->VY1+Y1 , Layer->VX1+X2 , Layer->VY1+Y2 , Layer->Height);
 	}
 }
 
@@ -158,8 +158,8 @@ void MoveLayer(LAYER *Layer , int X , int Y) {
 	Layer->VX1 = X;
 	Layer->VY1 = Y;
 	if(Layer->Height >= 0) {
-		UpdateLayerSub(OldVX1 , OldVY1 , OldVX1+Layer->BXSize , OldVY1+Layer->BYSize);
-		UpdateLayerSub(X , Y , X+Layer->BXSize , Y+Layer->BYSize);
+		UpdateLayerSub(OldVX1 , OldVY1 , OldVX1+Layer->BXSize , OldVY1+Layer->BYSize , 0);
+		UpdateLayerSub(X , Y , X+Layer->BXSize , Y+Layer->BYSize , Layer->Height);
 	}
 }
 

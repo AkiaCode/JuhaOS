@@ -40,15 +40,16 @@ WINDOW *Window::CreateWindow(const char *Title , WORD Flags , int X , int Y , in
 	}
 	if((Flags & WINDOW_FLAGS_NO_BACKGROUND) == WINDOW_FLAGS_NO_BACKGROUND) {
 		MoveLayer(Window->Layer , X , Y);
-		ChangeLayerHeight(Window->Layer , WindowManager.WindowsCount++);
+		ChangeLayerHeight(Window->Layer , WindowManager.WindowsCount);
 		UpdateLayer(Window->Layer , 0 , 0 , Width , Height);
+		WindowManager.WindowsCount++;
 		return Window;
 	}
 	if((Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR) {
 		Graphics::DrawRectangle(Window->Layer , 0 , 0 , Width , Height , BackgroundColor , FALSE);
 	}
 	MoveLayer(Window->Layer , X , Y);
-	ChangeLayerHeight(Window->Layer , WindowManager.WindowsCount++);
+	ChangeLayerHeight(Window->Layer , WindowManager.WindowsCount);
 	UpdateLayer(Window->Layer , 0 , 0 , Width , Height);
 	WindowManager.WindowsCount++;
 	return Window;
@@ -90,6 +91,7 @@ void Window::MouseWindow(void) {
 	int DY;
 	int WindowX;
 	int WindowY;
+	BOOL WindowMoving = FALSE;
     WINDOW *Window;
     WINDOW *TempBuffer;
     VBEMODEINFOBLOCK *Block = (VBEMODEINFOBLOCK*)VBEMODEINFOBLOCK_STARTADDRESS;
@@ -97,7 +99,7 @@ void Window::MouseWindow(void) {
     LAYER *Layer;
     X = (Block->Width-GRAPHICS_MOUSE_WIDTH)/2;
     Y = (Block->Height-GRAPHICS_MOUSE_HEIGHT)/2;
-    WindowManager.MouseWindow = CreateSystemWindow("Mouse window" , (Block->Width-GRAPHICS_MOUSE_WIDTH)/2 , (Block->Height-GRAPHICS_MOUSE_HEIGHT)/2 , GRAPHICS_MOUSE_WIDTH , GRAPHICS_MOUSE_HEIGHT , WINDOW_MAXCOUNT-1 , TRUE);
+    WindowManager.MouseWindow = CreateSystemWindow("Mouse window" , (Block->Width-GRAPHICS_MOUSE_WIDTH)/2 , (Block->Height-GRAPHICS_MOUSE_HEIGHT)/2 , GRAPHICS_MOUSE_WIDTH , GRAPHICS_MOUSE_HEIGHT , 5 , TRUE);
 	Graphics::DrawCursor(WindowManager.MouseWindow->Layer , 0 , 0 , TRUE);
     MoveLayer(WindowManager.MouseWindow->Layer , X , Y);
     while(1) {
@@ -105,16 +107,23 @@ void Window::MouseWindow(void) {
         	continue;
         }
         if(Button == 1) {
-        	LayerManager = GetLayerManager();
-        	for(i = LayerManager->Top-1; i > 0; i--) {
-        		Layer = LayerManager->Layers[i];
-        		WindowX = X-Layer->VX1;
-        		WindowY = Y-Layer->VY1;
-        		if((WindowX >= 0) && (WindowX < Layer->BXSize) && (WindowY >= 0) && (WindowY < Layer->BYSize)) {
-        			ChangeLayerHeight(Layer , LayerManager->Top-1);
-        			break;
-        		}
-        	}
+        	if(WindowMoving == FALSE) {
+	        	LayerManager = GetLayerManager();
+	        	for(i = LayerManager->Top-1; i > 0; i--) {
+	        		Layer = LayerManager->Layers[i];
+	        		if(((X-Layer->VX1) >= 0) && ((X-Layer->VX1) < Layer->BXSize) && ((Y-Layer->VY1) >= 0) && ((Y-Layer->VY1) < Layer->BYSize)) {
+	        			ChangeLayerHeight(Layer , LayerManager->Top-1);
+	        			WindowMoving = TRUE;
+	        			break;
+	        		}
+	        	}
+	        }
+	        else {
+	        	MoveLayer(Layer , Layer->VX1+DX , Layer->VY1+DY);
+	        }
+        }
+        else {
+        	WindowMoving = FALSE;
         }
         X += DX;
         Y += DY;

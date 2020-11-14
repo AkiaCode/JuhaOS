@@ -8,7 +8,8 @@ HEADERSFOLDER = Headers
 KERNELFOLDER = Kernel
 TEMPRORYFOLDER = ../../Temprory
 
-CCOPTION = -m64 -ffreestanding -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -Wno-write-strings -Wno-char-subscripts -Wno-unused-parameter -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -W -Wall -I $(HEADERSFOLDER)/ -nostdlib -nostdinc -masm=intel
+CCOPTION = -m64 -mcmodel=large -ffreestanding -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -Wno-write-strings -Wno-char-subscripts -Wno-unused-parameter -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -W -Wall -I $(HEADERSFOLDER)/ -nostdlib -nostdinc -masm=intel
+OCCOPTION = -m64 -O5 -mcmodel=large -ffreestanding -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -Wno-write-strings -Wno-char-subscripts -Wno-unused-parameter -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -W -Wall -I $(HEADERSFOLDER)/ -nostdlib -nostdinc -masm=intel
 TARGETOBJECTS = \
 Main.obj \
 TextScreen.obj \
@@ -21,13 +22,10 @@ IRQ.obj \
 Common.obj \
 Shell.obj \
 ShellFunctions.obj \
-MemoryManagement.obj \
 Task.obj \
 RAMDisk.obj \
 FAT32.obj \
-Graphics.obj \
-WindowSystem.obj \
-Layer.obj
+MemoryManagement.obj
 ENTRYFILE = Entry.asm
 ASSEMBLYFILE = Assembly.asm
 
@@ -40,7 +38,10 @@ clean:
 all: prepare $(TARGETOBJECTS)
 	nasm $(SOURCESFOLDER)/$(ENTRYFILE) -f elf64 -o $(TEMPRORYFOLDER)/64Bit/Entry.obj
 	nasm $(SOURCESFOLDER)/$(ASSEMBLYFILE) -f elf64 -o $(TEMPRORYFOLDER)/64Bit/Assembly.obj
-	cd $(TEMPRORYFOLDER)/64Bit; $(LD) -m elf_x86_64 -T ../../$(KERNELFOLDER)/64Bit/Linker.ld -o ../Kernel64.bin Entry.obj $(TARGETOBJECTS) Assembly.obj -nostdlib
+	$(CC) $(SOURCESFOLDER)/Graphics.cpp -c $(OCCOPTION) -o $(TEMPRORYFOLDER)/64Bit/Graphics.obj
+	$(CC) $(SOURCESFOLDER)/WindowSystem.cpp -c $(OCCOPTION) -o $(TEMPRORYFOLDER)/64Bit/WindowSystem.obj
+	$(CC) $(SOURCESFOLDER)/Layer.cpp -c $(OCCOPTION) -o $(TEMPRORYFOLDER)/64Bit/Layer.obj
+	cd $(TEMPRORYFOLDER)/64Bit; $(LD) -m elf_x86_64 -T ../../$(KERNELFOLDER)/64Bit/Linker.ld -o ../Kernel64.bin Entry.obj $(TARGETOBJECTS) Assembly.obj Graphics.obj WindowSystem.obj Layer.obj -nostdlib
 
 %.obj:
 	$(CC) $(SOURCESFOLDER)/$*.cpp -c $(CCOPTION) -o $(TEMPRORYFOLDER)/64Bit/$@
