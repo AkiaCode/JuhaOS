@@ -3,6 +3,7 @@
 #include <TextScreen.h>
 #include <MemoryManagement.h>
 #include <DescriptorTables.h>
+#include <Hal.h>
 
 static Task::Manager TaskManager;
 
@@ -54,6 +55,7 @@ QWORD Task::CreateTask(QWORD EntryPoint , QWORD Flags , const char *Name , const
 
     __asm__ ("sti");
     TaskManager.TaskCount++;
+    delay(10);
     return ID;
 }
 

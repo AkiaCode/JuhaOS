@@ -22,8 +22,8 @@ void Hal::InitSystem(void) {
     Hal::Keyboard::Initialize();
     Hal::Mouse::Initialize();
     Memory::Initialize();
-    Task::Initialize();
     Hal::Timer::Initialize();
+    Task::Initialize();
     RAMDisk::Initialize(RAMDISK_MAXSIZE);
     if(FAT32::Initialize() == FALSE) {
         __asm__ ("cli");
