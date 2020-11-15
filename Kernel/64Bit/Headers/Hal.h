@@ -43,6 +43,7 @@ namespace Hal {
     };
     namespace Timer {
         typedef struct {
+            BOOL Initialized;
             QWORD TickCount;
         }CONTROLLER;
         void Initialize(void);

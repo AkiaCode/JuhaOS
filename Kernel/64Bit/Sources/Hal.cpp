@@ -14,6 +14,8 @@ static Hal::Mouse::CONTROLLER MouseController;
 static Hal::Timer::CONTROLLER TimerController;
 
 void Hal::InitSystem(void) {
+    __asm__ ("cli");
+    TimerController.Initialized = FALSE;
     Hal::EnableA20();
     TextScreen::EnableCursor(0x00 , 0xFF);
     TextScreen::ClearScreen(0x07);
@@ -32,6 +34,7 @@ void Hal::InitSystem(void) {
         }
     }
     Window::Initialize();
+    __asm__ ("sti");
     TextScreen::printf("Done\n");
 }
 
@@ -108,6 +111,7 @@ void Hal::Mouse::Initialize(void) {
 }
 
 void Hal::Timer::Initialize(void) {
+    TimerController.Initialized = TRUE;
     TimerController.TickCount = 0;
     Hal::WritePort(0x43 , 0x30);
     Hal::WritePort(0x43 , 0x34);
@@ -134,6 +138,9 @@ void Hal::Timer::Interrupt(void) {
 void delay(QWORD Millisecond) {
     int i;
     QWORD LastTick = Hal::Timer::GetTickCount();
+    if(TimerController.Initialized == FALSE) {
+        return;
+    }
     while(1) {
         if(Hal::Timer::GetTickCount()-LastTick >= Millisecond*25) {
             break;

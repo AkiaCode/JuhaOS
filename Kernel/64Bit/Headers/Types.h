@@ -9,14 +9,13 @@ typedef unsigned long long int QWORD;
 typedef unsigned int size_t;
 typedef int BOOL;
 
-typedef signed short VIDEOMEMORY;
-
 #define OS_VERSION "0.1.2"
 
 #define TRUE 1
 #define FALSE 0
-
 #define NULL 0x00
+#define MIN(X , Y) ((X) < (Y)) ? (X) : (Y)
+#define MAX(X , Y) ((X) > (Y)) ? (X) : (Y)
 
 #pragma pack(push , 1)
 

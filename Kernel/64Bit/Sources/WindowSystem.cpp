@@ -2,128 +2,206 @@
 #include <MemoryManagement.h>
 #include <Hal.h>
 #include <Task.h>
+#include <string.h>
 
 static Window::Manager WindowManager;
 
-static WINDOW *CreateSystemWindow(const char *Title , int X , int Y , int Width , int Height , int Priority , BOOL Move) {
-	int i;
-	WINDOW *Window = (WINDOW*)Memory::malloc(sizeof(WINDOW));
-	Window->Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
-	Window->Layer = CreateLayer(Window->Buffer , FALSE , Width , Height , GRAPHICS_MOUSE_INVISIBLECOLOR);
-	ChangeLayerHeight(Window->Layer , Priority);
-	if(Move == TRUE) {
-		MoveLayer(Window->Layer , X , Y);
-	}
-	return Window;
-}
+void MouseTask(void);
 
 void Window::Initialize(void) {
-    int i;
-    VBEMODEINFOBLOCK *Block = (VBEMODEINFOBLOCK*)VBEMODEINFOBLOCK_STARTADDRESS;
-    WindowManager.WindowsCount = 1;
-    InitLayerSystem((WORD*)Block->Address , Block->Width , Block->Height);
-    WindowManager.BackgroundWindow = CreateSystemWindow("Background window" , 0 , 0 , Block->Width , Block->Height , 0x00 , FALSE);
-    Graphics::DrawRectangle(WindowManager.BackgroundWindow->Layer , 0 , 0 , Block->Width , Block->Height , WINDOW_DEFAULTWALLPAPERCOLOR , TRUE);
-    Task::CreateTask((QWORD)MouseWindow , TASK_SYSTEM , "MouseTask" , "Task for Mouse system(GUI)");
-    Task::CreateTask((QWORD)EventWindow , TASK_SYSTEM , "EventTask" , "GUI event processor");
-    delay(50);
-}
-
-WINDOW *Window::CreateWindow(const char *Title , WORD Flags , int X , int Y , int Width , int Height , WORD BackgroundColor) {
 	int i;
-	WINDOW *Window = (WINDOW*)Memory::malloc(sizeof(WINDOW));
-	Window->Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
-	Window->Flags = Flags;
-	Window->Layer = CreateLayer(Window->Buffer , FALSE , Width , Height , WINDOW_INVISIBLECOLOR);
-	if(Flags == WINDOW_FLAGS_DEFAULT) {
-		Graphics::DrawWindow(Window->Layer , 0 , 0 , Width , Height , Title , BackgroundColor , FALSE);
+	VBEMODEINFOBLOCK *Block = (VBEMODEINFOBLOCK*)VBEMODEINFOBLOCK_STARTADDRESS;
+	for(i = 0; i < WINDOW_MAXCOUNT; i++) {
+		WindowManager.Windows[i].Flags = WINDOW_FLAGS_NONE;
+		WindowManager.Windows[i].Using = FALSE;
 	}
-	if((Flags & WINDOW_FLAGS_NO_BACKGROUND) == WINDOW_FLAGS_NO_BACKGROUND) {
-		MoveLayer(Window->Layer , X , Y);
-		ChangeLayerHeight(Window->Layer , WindowManager.WindowsCount);
-		UpdateLayer(Window->Layer , 0 , 0 , Width , Height);
-		WindowManager.WindowsCount++;
-		return Window;
-	}
-	if((Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR) {
-		Graphics::DrawRectangle(Window->Layer , 0 , 0 , Width , Height , BackgroundColor , FALSE);
-	}
-	MoveLayer(Window->Layer , X , Y);
-	ChangeLayerHeight(Window->Layer , WindowManager.WindowsCount);
-	UpdateLayer(Window->Layer , 0 , 0 , Width , Height);
-	WindowManager.WindowsCount++;
-	return Window;
+	WindowManager.WindowCount = 0;
+	WindowManager.VideoMemory = (WORD*)Block->Address;
+	WindowManager.Width = Block->Width;
+	WindowManager.Height = Block->Height;
+	WindowManager.TopWindowPriority = -1;
+	WindowManager.Windows = (WINDOW*)Memory::malloc(WINDOW_MAXCOUNT*sizeof(WINDOW));
+	WindowManager.BackgroundWindow = Window::CreateWindow("BackgroundWindow" , WINDOW_FLAGS_NO_TITLEBAR , 0 , 0 , Block->Width , Block->Height , WINDOW_DEFAULTWALLPAPERCOLOR);
+	Task::CreateTask((QWORD)MouseTask , TASK_DEFAULT , "MouseTask" , "");
+	delay(100);
 }
 
-void Window::EventWindow(void) {
-	while(1) {
-		;
+static WINDOW *CreateSystemWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QWORD Width , QWORD Height , WORD BackgroundColor , int Priority) {
+	WindowManager.Windows[Priority].Using = TRUE;
+	WindowManager.Windows[Priority].InvisibleColorUsing = FALSE;
+	WindowManager.Windows[Priority].InvisibleColor = 0x00;
+	strcpy(WindowManager.Windows[Priority].Title , Title);
+	Layer::SetLayer(&(WindowManager.Windows[Priority].Layer) , X , Y , X+Width , Y+Height , (WORD*)NULL);
+	WindowManager.Windows[Priority].Layer.Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
+	if(((Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR)||(Flags == WINDOW_FLAGS_NO_TITLEBAR)) {
+		Graphics::DrawRectangle(&(WindowManager.Windows[Priority].Layer) , 0 , 0 , Width , Height , BackgroundColor);
 	}
+	else {
+		Graphics::DrawWindow(&(WindowManager.Windows[Priority].Layer) , 0 , 0 , Width , Height , Title , BackgroundColor);
+	}
+	Window::DrawWindowInScreen(&(WindowManager.Windows[Priority]));
+	return &(WindowManager.Windows[Priority]);
 }
 
-WINDOW *GetWindowByCoord(int X , int Y) {
+WINDOW *Window::CreateWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QWORD Width , QWORD Height , WORD BackgroundColor) {
 	int i;
-	int Priority = 0;
-	int X1;
-	int Y1;
-	int X2;
-	int Y2;
-	WINDOW *Window = NULL;
-	for(i = WINDOW_MAXCOUNT-1; i > 0; i--) {
-		X1 = WindowManager.Windows[i].Layer->VX1;
-		Y1 = WindowManager.Windows[i].Layer->VY1; 
-		X2 = X1+WindowManager.Windows[i].Layer->BXSize;
-		Y2 = Y1+WindowManager.Windows[i].Layer->BYSize;
-		if((X > X1)||(Y > Y2)||(X < X2)||(Y < Y2)) {
-			Window = &(WindowManager.Windows[i]);
+	for(i = 0; i < WINDOW_MAXCOUNT; i++) {
+		if(WindowManager.Windows[i].Using == FALSE) {
+			WindowManager.Windows[i].Using = TRUE;
 			break;
 		}
 	}
-	return Window;
+	WindowManager.Windows[i].InvisibleColorUsing = FALSE;
+	WindowManager.Windows[i].InvisibleColor = 0x00;
+	strcpy(WindowManager.Windows[i].Title , Title);
+	Layer::SetLayer(&(WindowManager.Windows[i].Layer) , X , Y , X+Width , Y+Height , (WORD*)NULL);
+	WindowManager.Windows[i].Layer.Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
+	if(((Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR)||(Flags == WINDOW_FLAGS_NO_TITLEBAR)) {
+		Graphics::DrawRectangle(&(WindowManager.Windows[i].Layer) , 0 , 0 , Width , Height , BackgroundColor);
+	}
+	else {
+		Graphics::DrawWindow(&(WindowManager.Windows[i].Layer) , 0 , 0 , Width , Height , Title , BackgroundColor);
+	}
+	WindowManager.WindowCount++;
+	DrawWindowInScreen(&(WindowManager.Windows[i]));
+	return &(WindowManager.Windows[i]);
 }
 
-void Window::MouseWindow(void) {
+static void UpdateWindowByCoord(int X1 , int Y1 , int X2 , int Y2) {
 	int i;
 	int X;
 	int Y;
-	int Button;
+	int BufferX;
+	int BufferY;
+	LAYER AreaToUpdate;
+	LAYER OverlappedArea;
+	WINDOW *Window;
+	WORD *VideoMemory = WindowManager.VideoMemory;
+	if(X1 < 0) {
+		X1 = 0;
+	}
+	if(Y1 < 0) {
+		Y1 = 0;
+	}
+	if(X2 > WindowManager.Width) {
+		X2 = WindowManager.Width;
+	}
+	if(Y2 > WindowManager.Height) {
+		Y2 = WindowManager.Height;
+	}
+	for(i = 0; i < WINDOW_MAXCOUNT; i++) {
+		Window = &(WindowManager.Windows[i]);
+		if(Window->Using == FALSE) {
+			i++;
+			continue;
+		}
+		for(BufferY = 0; BufferY < Window->Layer.Y2-Window->Layer.Y1; BufferY++) {
+			Y = Window->Layer.Y1+BufferY;
+			for(BufferX = 0; BufferX < Window->Layer.X2-Window->Layer.X1; BufferX++) {
+				X = WindowManager.Windows[i].Layer.X1+BufferX;
+				if((X1 <= X) && (X < X2) && (Y1 <= Y) && (Y < Y2)) {
+					if(Window->Layer.Buffer[BufferY*(Window->Layer.X2-Window->Layer.X1)+BufferX] != Window->InvisibleColor) {
+						VideoMemory[Y*(WindowManager.Width)+X] = Window->Layer.Buffer[BufferY*(Window->Layer.X2-Window->Layer.X1)+BufferX];
+					}
+					else if(Window->InvisibleColorUsing == FALSE) {
+						VideoMemory[Y*(WindowManager.Width)+X] = Window->Layer.Buffer[BufferY*(Window->Layer.X2-Window->Layer.X1)+BufferX];
+					}
+				}
+			}
+		}
+	}
+}
+
+void Window::UpdateWindow(WINDOW *Window) {
+	if(Window->Using == TRUE) {
+		UpdateWindowByCoord(Window->Layer.X1 , Window->Layer.Y1 , Window->Layer.X2 , Window->Layer.Y2);
+	}
+}
+
+void Window::MoveWindow(WINDOW *Window , int X , int Y) {
+	int LastX = Window->Layer.X1;
+	int LastY = Window->Layer.Y1;
+	int Width = Window->Layer.X2-Window->Layer.X1;
+	int Height = Window->Layer.Y2-Window->Layer.Y1;
+	
+	Window->Layer.X1 = X;
+	Window->Layer.X2 = X+Width;
+	Window->Layer.Y1 = Y;
+	Window->Layer.Y2 = Y+Height;
+	if(Window->Using == TRUE) {
+		UpdateWindowByCoord(LastX , LastY , LastX+Width , LastY+Width);
+		UpdateWindowByCoord(X , Y , X+Width , Y+Width);
+	}
+}
+
+void Window::ChangeWindowToTop(WINDOW *Window) {
+	WINDOW *TopWindow = NULL;
+	if(Window == WindowManager.BackgroundWindow) {
+		return;
+	}
+	if(Window->Using == FALSE) {
+		return;
+	}
+	memcpy(TopWindow , &(WindowManager.Windows[WindowManager.WindowCount]) , sizeof(WindowManager.Windows[WindowManager.WindowCount]));
+	memcpy(&(WindowManager.Windows[WindowManager.WindowCount]) , Window , sizeof(Window));
+	memcpy(Window , TopWindow , sizeof(Window));
+	DrawWindowInScreen(Window);
+	return;
+}
+
+WINDOW *Window::GetWindowUsingCoord(int X , int Y) {
+	int i;
+	WINDOW *Window;
+	for(i = WINDOW_MAXCOUNT-1; i > 1; i--) {
+		Window = &(WindowManager.Windows[i]);
+		if(Window->Using == FALSE) {
+			i--;
+			continue;
+		}
+		if((X > Window->Layer.X1) && (X < Window->Layer.X2) && (Y > Window->Layer.Y1) && (Y < Window->Layer.Y2)) {
+			return Window;
+		}
+	}
+}
+
+void Window::DrawWindowInScreen(WINDOW *Window) {
+	int X;
+	int Y;
+	WORD *VideoMemory = WindowManager.VideoMemory;
+	for(Y = 0; Y < Window->Layer.Y2-Window->Layer.Y1; Y++) {
+		for(X = 0; X < Window->Layer.X2-Window->Layer.X1; X++) {
+			if(Window->Layer.Buffer[Y*(Window->Layer.X2-Window->Layer.X1)+X] != Window->InvisibleColor) {
+				VideoMemory[(Y+Window->Layer.Y1)*(WindowManager.Width)+(X+Window->Layer.X1)] = Window->Layer.Buffer[Y*(Window->Layer.X2-Window->Layer.X1)+X];
+			}
+			else if(Window->InvisibleColorUsing == FALSE) {
+				VideoMemory[(Y+Window->Layer.Y1)*(WindowManager.Width)+(X+Window->Layer.X1)] = Window->Layer.Buffer[Y*(Window->Layer.X2-Window->Layer.X1)+X];
+			}
+		}
+	}
+}
+
+void MouseTask(void) {
+	int X;
+	int Y;
 	int DX;
 	int DY;
-	int WindowX;
-	int WindowY;
-	BOOL WindowMoving = FALSE;
-    WINDOW *Window;
-    WINDOW *TempBuffer;
-    VBEMODEINFOBLOCK *Block = (VBEMODEINFOBLOCK*)VBEMODEINFOBLOCK_STARTADDRESS;
-    LAYERMANAGER *LayerManager;
-    LAYER *Layer;
-    X = (Block->Width-GRAPHICS_MOUSE_WIDTH)/2;
-    Y = (Block->Height-GRAPHICS_MOUSE_HEIGHT)/2;
-    WindowManager.MouseWindow = CreateSystemWindow("Mouse window" , (Block->Width-GRAPHICS_MOUSE_WIDTH)/2 , (Block->Height-GRAPHICS_MOUSE_HEIGHT)/2 , GRAPHICS_MOUSE_WIDTH , GRAPHICS_MOUSE_HEIGHT , 5 , TRUE);
-	Graphics::DrawCursor(WindowManager.MouseWindow->Layer , 0 , 0 , TRUE);
-    MoveLayer(WindowManager.MouseWindow->Layer , X , Y);
-    while(1) {
-        if(Hal::Mouse::GetMouseData(&(DX) , &(DY) , &(Button)) == FALSE) {
+	int Button;
+	VBEMODEINFOBLOCK *Block = (VBEMODEINFOBLOCK*)VBEMODEINFOBLOCK_STARTADDRESS;
+
+	X = (Block->Width-GRAPHICS_MOUSE_WIDTH)/2;
+	Y = (Block->Height-GRAPHICS_MOUSE_HEIGHT)/2;
+	WindowManager.MouseWindow = CreateSystemWindow("MouseWindow" , WINDOW_FLAGS_NO_TITLEBAR , X , Y , GRAPHICS_MOUSE_WIDTH , GRAPHICS_MOUSE_HEIGHT , GRAPHICS_MOUSE_INVISIBLECOLOR , WINDOW_MAXCOUNT);
+	Graphics::DrawCursor(&(WindowManager.MouseWindow->Layer) , 0 , 0);
+	WindowManager.MouseWindow->InvisibleColorUsing = TRUE;
+	WindowManager.MouseWindow->InvisibleColor = GRAPHICS_MOUSE_INVISIBLECOLOR;
+	Window::UpdateWindow(WindowManager.MouseWindow);
+
+	while(1) {
+		if(Hal::Mouse::GetMouseData(&(DX) , &(DY) , &(Button)) == FALSE) {
         	continue;
         }
         if(Button == 1) {
-        	if(WindowMoving == FALSE) {
-	        	LayerManager = GetLayerManager();
-	        	for(i = LayerManager->Top-1; i > 0; i--) {
-	        		Layer = LayerManager->Layers[i];
-	        		if(((X-Layer->VX1) >= 0) && ((X-Layer->VX1) < Layer->BXSize) && ((Y-Layer->VY1) >= 0) && ((Y-Layer->VY1) < Layer->BYSize)) {
-	        			ChangeLayerHeight(Layer , LayerManager->Top-1);
-	        			WindowMoving = TRUE;
-	        			break;
-	        		}
-	        	}
-	        }
-	        else {
-	        	MoveLayer(Layer , Layer->VX1+DX , Layer->VY1+DY);
-	        }
-        }
-        else {
-        	WindowMoving = FALSE;
+        	Window::ChangeWindowToTop(Window::GetWindowUsingCoord(X , Y));
         }
         X += DX;
         Y += DY;
@@ -142,42 +220,6 @@ void Window::MouseWindow(void) {
         if(Y >= Block->Height-(GRAPHICS_MOUSE_HEIGHT/2)) {
             Y = Block->Height-(GRAPHICS_MOUSE_HEIGHT/2);
         }
-        MoveLayer(WindowManager.MouseWindow->Layer , X , Y);
+        Window::MoveWindow(WindowManager.MouseWindow , X , Y);
     }
-}
-
-void Window::DrawPixel(WINDOW *Window , int X , int Y , WORD Color) {
-	if((Window->Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR) {
-		Graphics::DrawPixel(Window->Layer , X , Y , Color , TRUE);
-	}
-	else {
-		Graphics::DrawPixel(Window->Layer , X+2 , Y+GRAPHICS_WINDOW_TITLEBARSIZE+4 , Color , TRUE);
-	}
-}
-
-void Window::DrawRectangle(WINDOW *Window , int X1 , int Y1 , int X2 , int Y2 , WORD Color) {
-	if((Window->Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR) {
-		Graphics::DrawRectangle(Window->Layer , X1 , Y1 , X2 , Y2 , Color , TRUE);
-	}
-	else {
-		Graphics::DrawRectangle(Window->Layer , X1+2 , Y1+GRAPHICS_WINDOW_TITLEBARSIZE+4 , X2+2 , Y2+GRAPHICS_WINDOW_TITLEBARSIZE+4 , Color , TRUE);
-	}
-}
-
-void Window::DrawText(WINDOW *Window , const char *Text , int X , int Y , WORD Color) {
-	if((Window->Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR) {
-		Graphics::DrawText(Window->Layer , Text , X , Y , Color , TRUE);
-	}
-	else {
-		Graphics::DrawText(Window->Layer , Text , X+2 , Y+GRAPHICS_WINDOW_TITLEBARSIZE+4 , Color , TRUE);
-	}
-}
-
-void Window::DrawLine(WINDOW *Window , int X1 , int Y1 , int X2 , int Y2 , WORD Color) {
-	if((Window->Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR) {
-		Graphics::DrawLine(Window->Layer , X1 , Y1 , X2 , Y2 , Color , TRUE);
-	}
-	else {
-		Graphics::DrawLine(Window->Layer , X1+2 , Y1+GRAPHICS_WINDOW_TITLEBARSIZE+4 , X2+2 , Y2+GRAPHICS_WINDOW_TITLEBARSIZE+4 , Color , TRUE);
-	}
 }

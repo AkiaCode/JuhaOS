@@ -55,6 +55,7 @@ QWORD Task::CreateTask(QWORD EntryPoint , QWORD Flags , const char *Name , const
 
     __asm__ ("sti");
     TaskManager.TaskCount++;
+    delay(50);
     return ID;
 }
 
