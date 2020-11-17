@@ -6,7 +6,7 @@
 
 #define WINDOW_MAXCOUNT 512
 
-#define WINDOW_MOUSEID 0x200000
+#define WINDOW_BACKGROUNDID 0x200000
 
 #define WINDOW_FLAGS_NONE 0xFF
 #define WINDOW_FLAGS_DEFAULT 0x01
@@ -47,6 +47,7 @@ namespace Window {
 	WINDOW *CreateWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QWORD Width , QWORD Height , WORD BackgroundColor);
 	void UpdateWindow(WINDOW *Window);
 	void MoveWindow(WINDOW *Window , int X , int Y);
+	int GetWindowPriority(WINDOW *Window);
 	void ChangeWindowToTop(WINDOW *Window);
 	WINDOW *GetWindowUsingCoord(int X , int Y);
 	void DrawWindowInScreen(WINDOW *Window);

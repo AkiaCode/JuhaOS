@@ -44,7 +44,7 @@ clean:
 	rm -f $(TARGET)
 	rm -f BootLoader.bin
 
-run:
+qemurun:
 	qemu-system-x86_64 -cdrom $(TARGET) -boot d -m $(MEMSIZE)
 
 debugrun:

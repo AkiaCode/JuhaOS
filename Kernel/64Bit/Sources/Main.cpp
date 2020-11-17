@@ -10,18 +10,55 @@ JuhaOS project, start:2020.08.24
 (C) 2017-2020. all rights reserved by Juha.
 */
 
+
+void WindowTask1(void) {
+	WINDOW *Window;
+    Window = Window::CreateWindow("Window1" , WINDOW_FLAGS_DEFAULT , 100 , 100 , 200 , 100 , RGB(255 , 255 , 255));
+    while(1) {
+    	;
+    }
+}
+
+void WindowTask2(void) {
+	WINDOW *Window;
+    Window = Window::CreateWindow("Window2" , WINDOW_FLAGS_DEFAULT , 150 , 150 , 400 , 300 , RGB(255 , 255 , 255));
+    while(1) {
+    	;
+    }
+}
+
+void WindowTask3(void) {
+	WINDOW *Window;
+    Window = Window::CreateWindow("Window3" , WINDOW_FLAGS_DEFAULT , 200 , 200 , 600 , 400 , RGB(255 , 255 , 255));
+    while(1) {
+    	;
+    }
+}
+
+void WindowTask4(void) {
+	WINDOW *Window;
+    Window = Window::CreateWindow("Window4" , WINDOW_FLAGS_DEFAULT , 250 , 250 , 300 , 200 , RGB(255 , 255 , 255));
+    while(1) {
+    	;
+    }
+}
+
+void WindowTask5(void) {
+	WINDOW *Window;
+    Window = Window::CreateWindow("Window5" , WINDOW_FLAGS_DEFAULT , 300 , 300 , 100 , 100 , RGB(255 , 255 , 255));
+    while(1) {
+    	;
+    }
+}
+
 extern "C" void Main(void) {
-	WINDOW *Window1;
-	WINDOW *Window2;
-	WINDOW *Window3;
-	WINDOW *Window4;
-	WINDOW *Window5;
     Hal::InitSystem();
-    Window1 = Window::CreateWindow("Window #1" , WINDOW_FLAGS_DEFAULT , 100 , 100 , 200 , 100 , RGB(255 , 255 , 255));
-    Window2 = Window::CreateWindow("Window #2" , WINDOW_FLAGS_DEFAULT , 150 , 150 , 200 , 100 , RGB(255 , 255 , 255));
-    Window3 = Window::CreateWindow("Window #3" , WINDOW_FLAGS_DEFAULT , 200 , 200 , 200 , 100 , RGB(255 , 255 , 255));
-    Window4 = Window::CreateWindow("Window #4" , WINDOW_FLAGS_DEFAULT , 250 , 250 , 200 , 100 , RGB(255 , 255 , 255));
-    Window5 = Window::CreateWindow("Window #5" , WINDOW_FLAGS_DEFAULT , 300 , 300 , 200 , 100 , RGB(255 , 255 , 255));
+    Task::CreateTask((QWORD)WindowTask1 , TASK_DEFAULT , "WindowTask1" , "");
+    Task::CreateTask((QWORD)WindowTask2 , TASK_DEFAULT , "WindowTask2" , "");
+    Task::CreateTask((QWORD)WindowTask3 , TASK_DEFAULT , "WindowTask3" , "");
+    Task::CreateTask((QWORD)WindowTask4 , TASK_DEFAULT , "WindowTask4" , "");
+    Task::CreateTask((QWORD)WindowTask5 , TASK_DEFAULT , "WindowTask5" , "");
+    delay(100);
     while(1) {
     	;
     }
