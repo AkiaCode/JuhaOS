@@ -6,7 +6,8 @@
 
 static Window::Manager WindowManager;
 
-void MouseTask(void);
+static void MouseWindow(void);
+static void SystemWindow(void);
 
 static WINDOW *CreateSystemWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QWORD Width , QWORD Height , WORD BackgroundColor , int Priority) {
 	WindowManager.Windows[Priority].Using = TRUE;
@@ -39,7 +40,8 @@ void Window::Initialize(void) {
 	WindowManager.TopWindowPriority = -1;
 	WindowManager.Windows = (WINDOW*)Memory::malloc((WINDOW_MAXCOUNT+1)*sizeof(WINDOW));
 	WindowManager.BackgroundWindow = CreateSystemWindow("BackgroundWindow" , WINDOW_FLAGS_NO_TITLEBAR , 0 , 0 , Block->Width , Block->Height , WINDOW_DEFAULTWALLPAPERCOLOR , 0);
-	Task::CreateTask((QWORD)MouseTask , TASK_DEFAULT , "MouseTask" , "");
+	Task::CreateTask((QWORD)MouseWindow , TASK_DEFAULT , "MouseSystem" , "");
+	Task::CreateTask((QWORD)SystemWindow , TASK_SYSTEM , "WindowManagementSystem" , "A task for window management, event stuff, DO NOT TOUCH THIS");
 	delay(100);
 }
 
@@ -73,8 +75,11 @@ static void UpdateWindowByCoord(int X1 , int Y1 , int X2 , int Y2) {
 	int Y;
 	int BufferX;
 	int BufferY;
-	LAYER AreaToUpdate;
-	LAYER OverlappedArea;
+
+	int BufferX1;
+	int BufferY1;
+	int BufferX2;
+	int BufferY2;
 	WINDOW *Window;
 	WORD *VideoMemory = WindowManager.VideoMemory;
 	if(X1 < 0) {
@@ -95,17 +100,31 @@ static void UpdateWindowByCoord(int X1 , int Y1 , int X2 , int Y2) {
 			i++;
 			continue;
 		}
-		for(BufferY = 0; BufferY < Window->Layer.Y2-Window->Layer.Y1; BufferY++) {
+		BufferX1 = X1-Window->Layer.X1;
+		BufferY1 = Y1-Window->Layer.Y1;
+		BufferX2 = X2-Window->Layer.X1;
+		BufferY2 = Y2-Window->Layer.Y1;
+		if(BufferX1 < 0) {
+			BufferX1 = 0;
+		}
+		if(BufferY1 < 0) {
+			BufferY1 = 0;
+		}
+		if(BufferX2 > Window->Layer.X2-Window->Layer.X1) {
+			BufferX2 = Window->Layer.X2-Window->Layer.X1;
+		}
+		if(BufferY2 > Window->Layer.Y2-Window->Layer.Y1) {
+			BufferY2 = Window->Layer.Y2-Window->Layer.Y1;
+		}
+		for(BufferY = BufferY1; BufferY < BufferY2; BufferY++) {
 			Y = Window->Layer.Y1+BufferY;
-			for(BufferX = 0; BufferX < Window->Layer.X2-Window->Layer.X1; BufferX++) {
-				X = WindowManager.Windows[i].Layer.X1+BufferX;
-				if((X1 <= X) && (X < X2) && (Y1 <= Y) && (Y < Y2)) {
-					if(Window->Layer.Buffer[BufferY*(Window->Layer.X2-Window->Layer.X1)+BufferX] != Window->InvisibleColor) {
-						VideoMemory[Y*(WindowManager.Width)+X] = Window->Layer.Buffer[BufferY*(Window->Layer.X2-Window->Layer.X1)+BufferX];
-					}
-					else if(Window->InvisibleColorUsing == FALSE) {
-						VideoMemory[Y*(WindowManager.Width)+X] = Window->Layer.Buffer[BufferY*(Window->Layer.X2-Window->Layer.X1)+BufferX];
-					}
+			for(BufferX = BufferX1; BufferX < BufferX2; BufferX++) {
+				X = Window->Layer.X1+BufferX;
+				if(Window->Layer.Buffer[BufferY*(Window->Layer.X2-Window->Layer.X1)+BufferX] != Window->InvisibleColor) {
+					VideoMemory[Y*(WindowManager.Width)+X] = Window->Layer.Buffer[BufferY*(Window->Layer.X2-Window->Layer.X1)+BufferX];
+				}
+				else if(Window->InvisibleColorUsing == FALSE) {
+					VideoMemory[Y*(WindowManager.Width)+X] = Window->Layer.Buffer[BufferY*(Window->Layer.X2-Window->Layer.X1)+BufferX];
 				}
 			}
 		}
@@ -219,7 +238,13 @@ void Window::DrawWindowInScreen(WINDOW *Window) {
 	}
 }
 
-void MouseTask(void) {
+void SystemWindow(void) {
+	while(1) {
+		;
+	}
+}
+
+void MouseWindow(void) {
 	int X;
 	int Y;
 	int DX;
@@ -234,7 +259,6 @@ void MouseTask(void) {
 	WindowManager.MouseWindow->InvisibleColorUsing = TRUE;
 	WindowManager.MouseWindow->InvisibleColor = GRAPHICS_MOUSE_INVISIBLECOLOR;
 	Window::UpdateWindow(WindowManager.MouseWindow);
-
 	while(1) {
 		if(Hal::Mouse::GetMouseData(&(DX) , &(DY) , &(Button)) == FALSE) {
         	continue;

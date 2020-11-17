@@ -18,7 +18,16 @@
 #define WINDOW_DEFAULTWALLPAPERCOLOR RGB(103 , 153 , 255)
 #define WINDOW_INVISIBLECOLOR 0x01
 
+#define WINDOW_EVENT_KEYBOARD 0x01
+#define WINDOW_EVENT_MOUSE 0x02
+#define WINDOW_EVENT_QUIT 0x04
+#define WINDOW_EVENT_ACTIVATED 0x08
+
 #pragma pack(push , 1)
+
+struct WINDOWEVENT {
+	DWORD EventType;
+};
 
 struct WINDOW {
 	QWORD Flags;
@@ -27,6 +36,8 @@ struct WINDOW {
 	WORD InvisibleColor;
 	LAYER Layer;
 	char Title[128];
+
+	WINDOWEVENT *Event;
 };
 
 namespace Window {
