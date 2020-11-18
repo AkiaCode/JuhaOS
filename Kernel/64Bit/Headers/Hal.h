@@ -9,7 +9,8 @@
 #define KEYBOARD_ARROW_RIGHT 0
 #define KEYBOARD_ARROW_LEFT  0
 
-#define TIMER_CYCLE (25*1193180)/1000000
+#define TIMER_NANOSECOND 200
+#define TIMER_CYCLE (TIMER_NANOSECOND*1193180)/1000000
 
 namespace Hal {
     extern "C" void WritePort(WORD Port , BYTE Data);
