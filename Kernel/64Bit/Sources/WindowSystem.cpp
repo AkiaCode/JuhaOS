@@ -37,7 +37,6 @@ static void UpdateWindowByCoord(int X1 , int Y1 , int X2 , int Y2) {
 	for(i = 0; i <= WINDOW_MAXCOUNT; i++) {
 		Window = &(WindowManager.Windows[i]);
 		if(Window->Using == FALSE) {
-			i++;
 			continue;
 		}
 		BufferX1 = X1-Window->Layer.X1;
@@ -140,23 +139,20 @@ WINDOW *Window::CreateWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QW
 	else {
 		Graphics::DrawWindow(&(WindowManager.Windows[i].Layer) , 0 , 0 , Width , Height , Title , BackgroundColor);
 	}
-	WindowManager.WindowCount++;
 	WindowIndex = i;
+	WindowManager.WindowCount++;
 	for(i = 1; i < WindowManager.WindowCount; i++) {
 		if(WindowManager.Windows[i].Using == FALSE) {
-			i++;
 			continue;
 		} 
 		if((WindowManager.Windows[i].Flags == WINDOW_FLAGS_NO_TITLEBAR)||((WindowManager.Windows[i].Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR)) {
-			i++;
 			continue;
 		}
 		Graphics::DrawTaskbar(&(WindowManager.Windows[i].Layer) , 0 , 0 , WindowManager.Windows[i].Layer.X2-WindowManager.Windows[i].Layer.X1 , WindowManager.Windows[i].Title , 0);
 		UpdateWindowByCoord(WindowManager.Windows[i].Layer.X1 , WindowManager.Windows[i].Layer.Y1 , WindowManager.Windows[i].Layer.X2 , WindowManager.Windows[i].Layer.Y1+GRAPHICS_WINDOW_TITLEBARSIZE+5);
 	}
 	Graphics::DrawTaskbar(&(WindowManager.Windows[WindowIndex].Layer) , 0 , 0 , WindowManager.Windows[WindowIndex].Layer.X2-WindowManager.Windows[WindowIndex].Layer.X1 , WindowManager.Windows[WindowIndex].Title , 1);
-	
-	UpdateWindow(&(WindowManager.Windows[i]));
+	UpdateWindow(&(WindowManager.Windows[WindowIndex]));
 	__asm__ ("sti");
 	return &(WindowManager.Windows[i]);
 }
@@ -200,7 +196,7 @@ void Window::ChangeWindowToTop(WINDOW *Window) {
 	if(Window->Using == FALSE) {
 		return;
 	}
-	for(i = 0; i < WINDOW_MAXCOUNT; i++) {
+	for(i = 1; i < WINDOW_MAXCOUNT-1; i++) {
 		if(Window == &(WindowManager.Windows[i])) {
 			WindowIndex = i;
 			break;
@@ -216,9 +212,11 @@ void Window::ChangeWindowToTop(WINDOW *Window) {
 	}
 	memcpy(&(WindowManager.Windows[WindowManager.WindowCount]) , &(WindowToMove) , sizeof(WindowToMove));
 
-	for(i = 1; i < WindowManager.WindowCount; i++) {
+	for(i = 1; i < WINDOW_MAXCOUNT-2; i++) {
+		if(WindowManager.Windows[i].Using == FALSE) {
+			continue;
+		}
 		if((WindowManager.Windows[i].Flags == WINDOW_FLAGS_NO_TITLEBAR)||((WindowManager.Windows[i].Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR)) {
-			i++;
 			continue;
 		}
 		Graphics::DrawTaskbar(&(WindowManager.Windows[i].Layer) , 0 , 0 , WindowManager.Windows[i].Layer.X2-WindowManager.Windows[i].Layer.X1 , WindowManager.Windows[i].Title , 0);
@@ -252,7 +250,6 @@ WINDOW *Window::GetWindowUsingCoord(int X , int Y) {
 	for(i = WINDOW_MAXCOUNT-1; i > 1; i--) {
 		Window = &(WindowManager.Windows[i]);
 		if(Window->Using == FALSE) {
-			i--;
 			continue;
 		}
 		if((X > Window->Layer.X1) && (X < Window->Layer.X2) && (Y > Window->Layer.Y1) && (Y < Window->Layer.Y2)) {
@@ -261,20 +258,54 @@ WINDOW *Window::GetWindowUsingCoord(int X , int Y) {
 	}
 }
 
-void Window::DrawWindowInScreen(WINDOW *Window) {
-	int X;
-	int Y;
-	WORD *VideoMemory = WindowManager.VideoMemory;
-	for(Y = 0; Y < Window->Layer.Y2-Window->Layer.Y1; Y++) {
-		for(X = 0; X < Window->Layer.X2-Window->Layer.X1; X++) {
-			if(Window->Layer.Buffer[Y*(Window->Layer.X2-Window->Layer.X1)+X] != Window->InvisibleColor) {
-				VideoMemory[(Y+Window->Layer.Y1)*(WindowManager.Width)+(X+Window->Layer.X1)] = Window->Layer.Buffer[Y*(Window->Layer.X2-Window->Layer.X1)+X];
-			}
-			else if(Window->InvisibleColorUsing == FALSE) {
-				VideoMemory[(Y+Window->Layer.Y1)*(WindowManager.Width)+(X+Window->Layer.X1)] = Window->Layer.Buffer[Y*(Window->Layer.X2-Window->Layer.X1)+X];
-			}
+BOOL Window::DeleteWindow(WINDOW *Window) {
+	int i;
+	int X1;
+	int Y1;
+	int X2;
+	int Y2;
+	__asm__ ("cli");
+	if(Window == WindowManager.BackgroundWindow) {
+		__asm__("sti");
+		return FALSE;
+	}
+	if(Window == WindowManager.MouseWindow) {
+		__asm__("sti");
+		return FALSE;
+	}
+	if(Window->Using == FALSE) {
+		__asm__("sti");
+		return FALSE;
+	}
+	for(i = 1; i <= WINDOW_MAXCOUNT; i++) {
+		if(WindowManager.Windows[i].Using == FALSE) {
+			continue;
+		}
+		if(Window == &(WindowManager.Windows[i])) {
+			break;
 		}
 	}
+	X1 = WindowManager.Windows[i].Layer.X1;
+	Y1 = WindowManager.Windows[i].Layer.Y1;
+	X2 = WindowManager.Windows[i].Layer.X2;
+	Y2 = WindowManager.Windows[i].Layer.Y2;
+	WindowManager.Windows[i].Using = FALSE;
+	if(i != WindowManager.WindowCount) {
+		for(; i < WINDOW_MAXCOUNT; i++) {
+			if(WindowManager.Windows[i].Using == FALSE) {
+				continue;
+			}
+			WindowManager.Windows[i] = WindowManager.Windows[i+1];
+		}
+		WindowManager.Windows[WindowManager.WindowCount].Using = FALSE;
+		UpdateWindowByCoord(WindowManager.Windows[WindowManager.WindowCount].Layer.X1 , 
+			WindowManager.Windows[WindowManager.WindowCount].Layer.Y1 , 
+			WindowManager.Windows[WindowManager.WindowCount].Layer.X2 , 
+			WindowManager.Windows[WindowManager.WindowCount].Layer.Y2);
+	}
+	UpdateWindowByCoord(X1 , Y1 , X2 , Y2);
+	__asm__("sti");
+	return TRUE;
 }
 
 void SystemWindow(void) {
@@ -302,8 +333,11 @@ void MouseWindow(void) {
 		if(Hal::Mouse::GetMouseData(&(DX) , &(DY) , &(Button)) == FALSE) {
         	continue;
         }
-        if(Button == 1) {
+        if(Button & 0x01) {
         	Window = Window::GetWindowUsingCoord(X , Y);
+        	if((X > Window->Layer.X2-(2*2)-GRAPHICS_WINDOW_TITLEBARSIZE) && (X < Window->Layer.X2-(2*2)-GRAPHICS_WINDOW_TITLEBARSIZE+GRAPHICS_WINDOW_XBUTTONWIDTH) && (Y > Window->Layer.Y1+2+3) && (Y < Window->Layer.Y1+2+3+GRAPHICS_WINDOW_XBUTTONHEIGHT)) {
+        		Window::DeleteWindow(Window);
+			}
         	if(Y-Window->Layer.Y1 < GRAPHICS_WINDOW_TITLEBARSIZE+5) {
 	        	Window::MoveWindow(Window , Window->Layer.X1+DX , Window->Layer.Y1+DY);
 	        	if(Window::GetWindowPriority(Window) < WindowManager.WindowCount) {
@@ -313,6 +347,9 @@ void MouseWindow(void) {
 	        else if(Window::GetWindowPriority(Window) < WindowManager.WindowCount) {
 	        	Window::ChangeWindowToTop(Window);
 	        }
+        }
+        else if(Button & 0x02) {
+        	Window::CreateWindow("made by user" , WINDOW_FLAGS_DEFAULT , X , Y , 200 , 100 , RGB(255 , 255 , 255));
         }
         X += DX;
         Y += DY;

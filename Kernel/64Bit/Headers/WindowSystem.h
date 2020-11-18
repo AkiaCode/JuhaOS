@@ -28,6 +28,12 @@
 
 struct WINDOWEVENT {
 	DWORD EventType;
+	union {
+		int X;
+		int Y;
+		int Button;
+	}Mouse;
+	BYTE KeyboardData;
 };
 
 struct WINDOW {
@@ -62,7 +68,7 @@ namespace Window {
 	int GetWindowPriority(WINDOW *Window);
 	void ChangeWindowToTop(WINDOW *Window);
 	WINDOW *GetWindowUsingCoord(int X , int Y);
-	void DrawWindowInScreen(WINDOW *Window);
+	BOOL DeleteWindow(WINDOW *Window);
 };
 
 #pragma pack(pop)

@@ -154,9 +154,6 @@ void Graphics::DrawCursor(LAYER *Layer , int X , int Y) {
 			case '0':
 				DrawPixel(Layer , X , Y , RGB(255 , 255 , 255));
 				break;
-			case '%':
-				DrawPixel(Layer , X , Y , RGB(185 , 185 , 185));
-				break;
 			case '$':
 				DrawPixel(Layer , X , Y , RGB(138 , 138 , 138));
 				break;
