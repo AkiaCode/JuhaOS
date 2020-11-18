@@ -63,8 +63,8 @@ void Main32(unsigned long MultibootMagic , unsigned long MultibootAddress) {
         *TextScreenBuffer++ = 0x00;
         *TextScreenBuffer++ = 0x07;
     }
-    if((RAMSize = CheckMaxMemory()) < 128) {
-        PrintString(0 , 0 , "RAM size is too low, min 128MB required :(");
+    if((RAMSize = CheckMaxMemory()) < 512) {
+        PrintString(0 , 0 , "RAM size is too low, min 512MB required :(");
         while(1) {
             ;
         }

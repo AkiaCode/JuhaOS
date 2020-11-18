@@ -9,66 +9,6 @@ static Window::Manager WindowManager;
 static void MouseWindow(void);
 static void SystemWindow(void);
 
-static WINDOW *CreateSystemWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QWORD Width , QWORD Height , WORD BackgroundColor , int Priority) {
-	WindowManager.Windows[Priority].Using = TRUE;
-	WindowManager.Windows[Priority].InvisibleColorUsing = FALSE;
-	WindowManager.Windows[Priority].InvisibleColor = 0x00;
-	strcpy(WindowManager.Windows[Priority].Title , Title);
-	Layer::SetLayer(&(WindowManager.Windows[Priority].Layer) , X , Y , X+Width , Y+Height , (WORD*)NULL);
-	WindowManager.Windows[Priority].Layer.Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
-	if(((Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR)||(Flags == WINDOW_FLAGS_NO_TITLEBAR)) {
-		Graphics::DrawRectangle(&(WindowManager.Windows[Priority].Layer) , 0 , 0 , Width , Height , BackgroundColor);
-	}
-	else {
-		Graphics::DrawWindow(&(WindowManager.Windows[Priority].Layer) , 0 , 0 , Width , Height , Title , BackgroundColor);
-	}
-	Window::UpdateWindow(&(WindowManager.Windows[Priority]));
-	return &(WindowManager.Windows[Priority]);
-}
-
-void Window::Initialize(void) {
-	int i;
-	VBEMODEINFOBLOCK *Block = (VBEMODEINFOBLOCK*)VBEMODEINFOBLOCK_STARTADDRESS;
-	for(i = 0; i < WINDOW_MAXCOUNT; i++) {
-		WindowManager.Windows[i].Flags = WINDOW_FLAGS_NONE;
-		WindowManager.Windows[i].Using = FALSE;
-	}
-	WindowManager.WindowCount = 0;
-	WindowManager.VideoMemory = (WORD*)Block->Address;
-	WindowManager.Width = Block->Width;
-	WindowManager.Height = Block->Height;
-	WindowManager.TopWindowPriority = -1;
-	WindowManager.Windows = (WINDOW*)Memory::malloc((WINDOW_MAXCOUNT+1)*sizeof(WINDOW));
-	WindowManager.BackgroundWindow = CreateSystemWindow("BackgroundWindow" , WINDOW_FLAGS_NO_TITLEBAR , 0 , 0 , Block->Width , Block->Height , WINDOW_DEFAULTWALLPAPERCOLOR , 0);
-	Task::CreateTask((QWORD)MouseWindow , TASK_DEFAULT , "MouseSystem" , "");
-	Task::CreateTask((QWORD)SystemWindow , TASK_SYSTEM , "WindowManagementSystem" , "A task for window management, event stuff, DO NOT TOUCH THIS");
-	delay(100);
-}
-
-WINDOW *Window::CreateWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QWORD Width , QWORD Height , WORD BackgroundColor) {
-	int i;
-	for(i = 0; i < WINDOW_MAXCOUNT; i++) {
-		if(WindowManager.Windows[i].Using == FALSE) {
-			WindowManager.Windows[i].Using = TRUE;
-			break;
-		}
-	}
-	WindowManager.Windows[i].InvisibleColorUsing = FALSE;
-	WindowManager.Windows[i].InvisibleColor = 0x00;
-	strcpy(WindowManager.Windows[i].Title , Title);
-	Layer::SetLayer(&(WindowManager.Windows[i].Layer) , X , Y , X+Width , Y+Height , (WORD*)NULL);
-	WindowManager.Windows[i].Layer.Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
-	if(((Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR)||(Flags == WINDOW_FLAGS_NO_TITLEBAR)) {
-		Graphics::DrawRectangle(&(WindowManager.Windows[i].Layer) , 0 , 0 , Width , Height , BackgroundColor);
-	}
-	else {
-		Graphics::DrawWindow(&(WindowManager.Windows[i].Layer) , 0 , 0 , Width , Height , Title , BackgroundColor);
-	}
-	WindowManager.WindowCount++;
-	UpdateWindow(&(WindowManager.Windows[i]));
-	return &(WindowManager.Windows[i]);
-}
-
 static void UpdateWindowByCoord(int X1 , int Y1 , int X2 , int Y2) {
 	int i;
 	int X;
@@ -131,6 +71,96 @@ static void UpdateWindowByCoord(int X1 , int Y1 , int X2 , int Y2) {
 	}
 }
 
+static WINDOW *CreateSystemWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QWORD Width , QWORD Height , WORD BackgroundColor , int Priority) {
+	__asm__ ("cli");
+	WindowManager.Windows[Priority].Using = TRUE;
+	WindowManager.Windows[Priority].InvisibleColorUsing = FALSE;
+	WindowManager.Windows[Priority].InvisibleColor = 0x00;
+	strcpy(WindowManager.Windows[Priority].Title , Title);
+	Layer::SetLayer(&(WindowManager.Windows[Priority].Layer) , X , Y , X+Width , Y+Height , (WORD*)NULL);
+	WindowManager.Windows[Priority].Layer.Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
+	if(((Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR)||(Flags == WINDOW_FLAGS_NO_TITLEBAR)) {
+		Graphics::DrawRectangle(&(WindowManager.Windows[Priority].Layer) , 0 , 0 , Width , Height , BackgroundColor);
+	}
+	else {
+		Graphics::DrawWindow(&(WindowManager.Windows[Priority].Layer) , 0 , 0 , Width , Height , Title , BackgroundColor);
+	}
+	Window::UpdateWindow(&(WindowManager.Windows[Priority]));
+	__asm__("sti");
+	return &(WindowManager.Windows[Priority]);
+}
+
+static void MakeWindowHighest(WINDOW *Window) {
+	Graphics::DrawTaskbar(&(Window->Layer) , Window->Layer.X1 , Window->Layer.Y1 , Window->Layer.X2-Window->Layer.X1 , Window->Title , 1);
+}
+
+static void MakeWindowNoHighest(WINDOW *Window) {
+	Graphics::DrawTaskbar(&(Window->Layer) , Window->Layer.X1 , Window->Layer.Y1 , Window->Layer.X2-Window->Layer.X1 , Window->Title , 0);
+}
+
+void Window::Initialize(void) {
+	int i;
+	VBEMODEINFOBLOCK *Block = (VBEMODEINFOBLOCK*)VBEMODEINFOBLOCK_STARTADDRESS;
+	__asm__ ("cli");
+	for(i = 0; i < WINDOW_MAXCOUNT; i++) {
+		WindowManager.Windows[i].Flags = WINDOW_FLAGS_NONE;
+		WindowManager.Windows[i].Using = FALSE;
+	}
+	WindowManager.WindowCount = 0;
+	WindowManager.VideoMemory = (WORD*)Block->Address;
+	WindowManager.Width = Block->Width;
+	WindowManager.Height = Block->Height;
+	WindowManager.TopWindowPriority = -1;
+	WindowManager.Windows = (WINDOW*)Memory::malloc((WINDOW_MAXCOUNT+1)*sizeof(WINDOW));
+	WindowManager.BackgroundWindow = CreateSystemWindow("BackgroundWindow" , WINDOW_FLAGS_NO_TITLEBAR , 0 , 0 , Block->Width , Block->Height , WINDOW_DEFAULTWALLPAPERCOLOR , 0);
+	Task::CreateTask((QWORD)MouseWindow , TASK_DEFAULT , "MouseSystem" , "");
+	Task::CreateTask((QWORD)SystemWindow , TASK_SYSTEM , "WindowManagementSystem" , "A task for window management, event stuff, DO NOT TOUCH THIS");
+	__asm__("sti");
+	delay(100);
+}
+
+WINDOW *Window::CreateWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QWORD Width , QWORD Height , WORD BackgroundColor) {
+	int i;
+	int WindowIndex;
+	__asm__ ("cli");
+	for(i = 0; i < WINDOW_MAXCOUNT; i++) {
+		if(WindowManager.Windows[i].Using == FALSE) {
+			WindowManager.Windows[i].Using = TRUE;
+			break;
+		}
+	}
+	WindowManager.Windows[i].InvisibleColorUsing = FALSE;
+	WindowManager.Windows[i].InvisibleColor = 0x00;
+	strcpy(WindowManager.Windows[i].Title , Title);
+	Layer::SetLayer(&(WindowManager.Windows[i].Layer) , X , Y , X+Width , Y+Height , (WORD*)NULL);
+	WindowManager.Windows[i].Layer.Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
+	if(((Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR)||(Flags == WINDOW_FLAGS_NO_TITLEBAR)) {
+		Graphics::DrawRectangle(&(WindowManager.Windows[i].Layer) , 0 , 0 , Width , Height , BackgroundColor);
+	}
+	else {
+		Graphics::DrawWindow(&(WindowManager.Windows[i].Layer) , 0 , 0 , Width , Height , Title , BackgroundColor);
+	}
+	WindowManager.WindowCount++;
+	WindowIndex = i;
+	for(i = 1; i < WindowManager.WindowCount; i++) {
+		if(WindowManager.Windows[i].Using == FALSE) {
+			i++;
+			continue;
+		} 
+		if((WindowManager.Windows[i].Flags == WINDOW_FLAGS_NO_TITLEBAR)||((WindowManager.Windows[i].Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR)) {
+			i++;
+			continue;
+		}
+		Graphics::DrawTaskbar(&(WindowManager.Windows[i].Layer) , 0 , 0 , WindowManager.Windows[i].Layer.X2-WindowManager.Windows[i].Layer.X1 , WindowManager.Windows[i].Title , 0);
+		UpdateWindowByCoord(WindowManager.Windows[i].Layer.X1 , WindowManager.Windows[i].Layer.Y1 , WindowManager.Windows[i].Layer.X2 , WindowManager.Windows[i].Layer.Y1+GRAPHICS_WINDOW_TITLEBARSIZE+5);
+	}
+	Graphics::DrawTaskbar(&(WindowManager.Windows[WindowIndex].Layer) , 0 , 0 , WindowManager.Windows[WindowIndex].Layer.X2-WindowManager.Windows[WindowIndex].Layer.X1 , WindowManager.Windows[WindowIndex].Title , 1);
+	
+	UpdateWindow(&(WindowManager.Windows[i]));
+	__asm__ ("sti");
+	return &(WindowManager.Windows[i]);
+}
+
 void Window::UpdateWindow(WINDOW *Window) {
 	if(Window->Using == TRUE) {
 		UpdateWindowByCoord(Window->Layer.X1 , Window->Layer.Y1 , Window->Layer.X2 , Window->Layer.Y2);
@@ -186,6 +216,15 @@ void Window::ChangeWindowToTop(WINDOW *Window) {
 	}
 	memcpy(&(WindowManager.Windows[WindowManager.WindowCount]) , &(WindowToMove) , sizeof(WindowToMove));
 
+	for(i = 1; i < WindowManager.WindowCount; i++) {
+		if((WindowManager.Windows[i].Flags == WINDOW_FLAGS_NO_TITLEBAR)||((WindowManager.Windows[i].Flags & WINDOW_FLAGS_NO_TITLEBAR) == WINDOW_FLAGS_NO_TITLEBAR)) {
+			i++;
+			continue;
+		}
+		Graphics::DrawTaskbar(&(WindowManager.Windows[i].Layer) , 0 , 0 , WindowManager.Windows[i].Layer.X2-WindowManager.Windows[i].Layer.X1 , WindowManager.Windows[i].Title , 0);
+		UpdateWindowByCoord(WindowManager.Windows[i].Layer.X1 , WindowManager.Windows[i].Layer.Y1 , WindowManager.Windows[i].Layer.X2 , WindowManager.Windows[i].Layer.Y1+GRAPHICS_WINDOW_TITLEBARSIZE+5);
+	}
+	Graphics::DrawTaskbar(&(WindowManager.Windows[WindowManager.WindowCount].Layer) , 0 , 0 , WindowManager.Windows[WindowManager.WindowCount].Layer.X2-WindowManager.Windows[WindowManager.WindowCount].Layer.X1 , WindowManager.Windows[WindowManager.WindowCount].Title , 1);
 	UpdateWindow(&(WindowManager.Windows[WindowIndex]));
 	UpdateWindow(&(WindowManager.Windows[WindowManager.WindowCount]));
 	return;
@@ -265,7 +304,7 @@ void MouseWindow(void) {
         }
         if(Button == 1) {
         	Window = Window::GetWindowUsingCoord(X , Y);
-        	if(Y-Window->Layer.Y1 < GRAPHICS_WINDOW_TITLEBARSIZE) {
+        	if(Y-Window->Layer.Y1 < GRAPHICS_WINDOW_TITLEBARSIZE+5) {
 	        	Window::MoveWindow(Window , Window->Layer.X1+DX , Window->Layer.Y1+DY);
 	        	if(Window::GetWindowPriority(Window) < WindowManager.WindowCount) {
 	        		Window::ChangeWindowToTop(Window);

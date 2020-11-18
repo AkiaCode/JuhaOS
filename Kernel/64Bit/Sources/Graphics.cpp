@@ -182,15 +182,12 @@ void Graphics::DrawCursor(LAYER *Layer , int X , int Y) {
 
 #define XBUTTON_COLOR 0
 
-void Graphics::DrawWindow(LAYER *Layer , int X , int Y , int Width , int Height , const char *Title , WORD BackgroundColor) {
+void Graphics::DrawTaskbar(LAYER *Layer , int X , int Y , int Width , const char *Title , int Mode) {
 	int i;
 	int j;
 	const int Padding = 2;
 	const int TaskbarSize = GRAPHICS_WINDOW_TITLEBARSIZE;
-	int XButtonX = X+Width-(Padding*2)-TaskbarSize;
-	int XButtonY = Y+Padding+3;
-
-	const WORD TaskbarColor = WINDOW_TITLECOLOR;
+	WORD TaskbarColor;
 
 	const char XButton[13][14] = {
 		"#############" , 
@@ -206,10 +203,14 @@ void Graphics::DrawWindow(LAYER *Layer , int X , int Y , int Width , int Height 
 		"#%@@@@@@@@@@#" , 
 		"#############" , 
 	};
-	Graphics::DrawRectangle(Layer , X , Y , X+Width , Y+Height , 0x00);
-	Graphics::DrawRectangle(Layer , X+Padding , Y+Padding , X+Width-(Padding) , Y+Height-(Padding) , RGB(77 , 77 , 77));
-	Graphics::DrawRectangle(Layer , X+Padding , Y+Padding , X+Width-(Padding)-1 , Y+Height-(Padding)-1 , BackgroundColor);
-
+	int XButtonX = X+Width-(Padding*2)-TaskbarSize;
+	int XButtonY = Y+Padding+3;
+	if(Mode == 1) {
+		TaskbarColor = WINDOW_TITLECOLOR;
+	}
+	else {
+		TaskbarColor = WINDOW_TITLECOLOR_UNSELECTED;
+	}
 	Graphics::DrawRectangle(Layer , X+Padding+1 , Y+Padding+1 , X+Width-(Padding*2) , Y+Padding+TaskbarSize+2 , TaskbarColor);
 	Graphics::DrawLine(Layer , X+Padding+1 , Y+Padding+1 , X+Width-(Padding*2)-1 , Y+Padding+1 , 0x00);
 	Graphics::DrawLine(Layer , X+Padding+1 , Y+Padding , X+Padding+1 , Y+Padding+TaskbarSize+1 , 0x00);
@@ -261,5 +262,16 @@ void Graphics::DrawWindow(LAYER *Layer , int X , int Y , int Width , int Height 
 			}
 		}
 	}
-	Graphics::DrawText(Layer , Title , X+6 , Y+4 , RGB(255 , 255 , 255));
+	Graphics::DrawText(Layer , Title , X+6 , Y+3 , RGB(255 , 255 , 255));
+}
+
+void Graphics::DrawWindow(LAYER *Layer , int X , int Y , int Width , int Height , const char *Title , WORD BackgroundColor) {
+	const int Padding = 2;
+	const int TaskbarSize = GRAPHICS_WINDOW_TITLEBARSIZE;
+
+	const WORD TaskbarColor = WINDOW_TITLECOLOR;
+	Graphics::DrawRectangle(Layer , X , Y , X+Width , Y+Height , 0x00);
+	Graphics::DrawRectangle(Layer , X+Padding , Y+Padding , X+Width-(Padding) , Y+Height-(Padding) , RGB(77 , 77 , 77));
+	Graphics::DrawRectangle(Layer , X+Padding , Y+Padding , X+Width-(Padding)-1 , Y+Height-(Padding)-1 , BackgroundColor);
+	DrawTaskbar(Layer , X , Y , Width , Title , 1);
 }

@@ -33,7 +33,7 @@ void Hal::InitSystem(void) {
             __asm__ ("hlt");
         }
     }
-//    Window::Initialize();
+    Window::Initialize();
     __asm__ ("sti");
     TextScreen::printf("Done\n");
 }
