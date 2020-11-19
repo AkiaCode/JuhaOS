@@ -4,6 +4,9 @@
 #include <Hal.h>
 
 void Common::Queue::Initialize(int MaxSize) {
+    if(MaxSize > QUEUE_MAXSIZE) {
+        MaxSize = QUEUE_MAXSIZE;
+    }
     this->MaxSize = MaxSize;
     this->Rear = 0;
     this->Front = 0;

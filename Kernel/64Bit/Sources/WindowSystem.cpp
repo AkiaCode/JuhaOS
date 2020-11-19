@@ -3,13 +3,14 @@
 #include <Hal.h>
 #include <Task.h>
 #include <string.h>
+#include <Common.h>
 
 static Window::Manager WindowManager;
 
 static void MouseWindow(void);
 static void SystemWindow(void);
 
-static void UpdateWindowByCoord(int X1 , int Y1 , int X2 , int Y2) {
+void Window::UpdateWindowByCoord(int X1 , int Y1 , int X2 , int Y2) {
 	int i;
 	int X;
 	int Y;
@@ -73,6 +74,7 @@ static void UpdateWindowByCoord(int X1 , int Y1 , int X2 , int Y2) {
 static WINDOW *CreateSystemWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QWORD Width , QWORD Height , WORD BackgroundColor , int Priority) {
 	__asm__ ("cli");
 	WindowManager.Windows[Priority].Using = TRUE;
+	WindowManager.Windows[Priority].BackgroundColor = BackgroundColor;
 	WindowManager.Windows[Priority].InvisibleColorUsing = FALSE;
 	WindowManager.Windows[Priority].InvisibleColor = 0x00;
 	strcpy(WindowManager.Windows[Priority].Title , Title);
@@ -85,6 +87,7 @@ static WINDOW *CreateSystemWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y
 		Graphics::DrawWindow(&(WindowManager.Windows[Priority].Layer) , 0 , 0 , Width , Height , Title , BackgroundColor);
 	}
 	Window::UpdateWindow(&(WindowManager.Windows[Priority]));
+	WindowManager.Windows[Priority].EventQueue.Initialize(WINDOW_EVENT_QUEUE_MAXSIZE);
 	__asm__("sti");
 	return &(WindowManager.Windows[Priority]);
 }
@@ -113,7 +116,6 @@ void Window::Initialize(void) {
 	WindowManager.Windows = (WINDOW*)Memory::malloc((WINDOW_MAXCOUNT+1)*sizeof(WINDOW));
 	WindowManager.BackgroundWindow = CreateSystemWindow("BackgroundWindow" , WINDOW_FLAGS_NO_TITLEBAR , 0 , 0 , Block->Width , Block->Height , WINDOW_DEFAULTWALLPAPERCOLOR , 0);
 	Task::CreateTask((QWORD)MouseWindow , TASK_DEFAULT , "MouseSystem" , "");
-	Task::CreateTask((QWORD)SystemWindow , TASK_SYSTEM , "WindowManagementSystem" , "A task for window management, event stuff, DO NOT TOUCH THIS");
 	__asm__("sti");
 	delay(100);
 }
@@ -130,6 +132,7 @@ WINDOW *Window::CreateWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QW
 	}
 	WindowManager.Windows[i].InvisibleColorUsing = FALSE;
 	WindowManager.Windows[i].InvisibleColor = 0x00;
+	WindowManager.Windows[i].BackgroundColor = BackgroundColor;
 	strcpy(WindowManager.Windows[i].Title , Title);
 	Layer::SetLayer(&(WindowManager.Windows[i].Layer) , X , Y , X+Width , Y+Height , (WORD*)NULL);
 	WindowManager.Windows[i].Layer.Buffer = (WORD*)Memory::malloc(Width*Height*sizeof(WORD));
@@ -153,6 +156,7 @@ WINDOW *Window::CreateWindow(char *Title , QWORD Flags  , QWORD X , QWORD Y , QW
 	}
 	Graphics::DrawTaskbar(&(WindowManager.Windows[WindowIndex].Layer) , 0 , 0 , WindowManager.Windows[WindowIndex].Layer.X2-WindowManager.Windows[WindowIndex].Layer.X1 , WindowManager.Windows[WindowIndex].Title , 1);
 	UpdateWindow(&(WindowManager.Windows[WindowIndex]));
+	WindowManager.Windows[i].EventQueue.Initialize(WINDOW_EVENT_QUEUE_MAXSIZE);
 	__asm__ ("sti");
 	return &(WindowManager.Windows[i]);
 }
@@ -203,6 +207,8 @@ void Window::ChangeWindowToTop(WINDOW *Window) {
 		}
 	}
 	if(i >= WindowManager.WindowCount) {
+		Graphics::DrawTaskbar(&(WindowManager.Windows[i].Layer) , 0 , 0 , WindowManager.Windows[i].Layer.X2-WindowManager.Windows[i].Layer.X1 , WindowManager.Windows[i].Title , 1);
+		UpdateWindowByCoord(WindowManager.Windows[i].Layer.X1 , WindowManager.Windows[i].Layer.Y1 , WindowManager.Windows[i].Layer.X2 , WindowManager.Windows[i].Layer.Y1+GRAPHICS_WINDOW_TITLEBARSIZE+5);
 		return;
 	}
 	memcpy(&(WindowToMove) , &(WindowManager.Windows[WindowIndex]) , sizeof(WindowManager.Windows[WindowIndex]));
@@ -212,7 +218,7 @@ void Window::ChangeWindowToTop(WINDOW *Window) {
 	}
 	memcpy(&(WindowManager.Windows[WindowManager.WindowCount]) , &(WindowToMove) , sizeof(WindowToMove));
 
-	for(i = 1; i < WINDOW_MAXCOUNT-2; i++) {
+	for(i = 1; i < WindowManager.WindowCount; i++) {
 		if(WindowManager.Windows[i].Using == FALSE) {
 			continue;
 		}
@@ -277,7 +283,7 @@ BOOL Window::DeleteWindow(WINDOW *Window) {
 		__asm__("sti");
 		return FALSE;
 	}
-	for(i = 1; i <= WINDOW_MAXCOUNT; i++) {
+	for(i = 1; i < WindowManager.WindowCount; i++) {
 		if(WindowManager.Windows[i].Using == FALSE) {
 			continue;
 		}
@@ -285,32 +291,35 @@ BOOL Window::DeleteWindow(WINDOW *Window) {
 			break;
 		}
 	}
+	WindowManager.Windows[i].Using = FALSE;
 	X1 = WindowManager.Windows[i].Layer.X1;
 	Y1 = WindowManager.Windows[i].Layer.Y1;
 	X2 = WindowManager.Windows[i].Layer.X2;
 	Y2 = WindowManager.Windows[i].Layer.Y2;
-	WindowManager.Windows[i].Using = FALSE;
-	if(i != WindowManager.WindowCount) {
-		for(; i < WINDOW_MAXCOUNT; i++) {
-			if(WindowManager.Windows[i].Using == FALSE) {
-				continue;
-			}
-			WindowManager.Windows[i] = WindowManager.Windows[i+1];
-		}
-		WindowManager.Windows[WindowManager.WindowCount].Using = FALSE;
-		UpdateWindowByCoord(WindowManager.Windows[WindowManager.WindowCount].Layer.X1 , 
-			WindowManager.Windows[WindowManager.WindowCount].Layer.Y1 , 
-			WindowManager.Windows[WindowManager.WindowCount].Layer.X2 , 
-			WindowManager.Windows[WindowManager.WindowCount].Layer.Y2);
-	}
 	UpdateWindowByCoord(X1 , Y1 , X2 , Y2);
 	__asm__("sti");
 	return TRUE;
 }
 
-void SystemWindow(void) {
+static Common::Queue KeyboardQueue;
+
+static void KeyboardController(void) {
+	BYTE Keyboard;
 	while(1) {
-		;
+		KeyboardQueue.Enqueue(getch());
+	}
+}
+
+void Window::WindowSystem(void) {
+	WINDOWEVENT Event;
+	KeyboardQueue.Initialize(2048);
+	Task::CreateTask((QWORD)KeyboardController , TASK_SYSTEM , "MouseQueueSystem" , "");
+	while(1) {
+		if(KeyboardQueue.CheckEmpty() != TRUE) {
+			Event.Type = WINDOW_EVENT_KEYBOARD;
+			Event.KeyboardData = KeyboardQueue.Dequeue();
+			WindowManager.Windows[WindowManager.WindowCount].EventQueue.SendEvent(Event);
+		}
 	}
 }
 
@@ -333,24 +342,19 @@ void MouseWindow(void) {
 		if(Hal::Mouse::GetMouseData(&(DX) , &(DY) , &(Button)) == FALSE) {
         	continue;
         }
+
         if(Button & 0x01) {
         	Window = Window::GetWindowUsingCoord(X , Y);
-        	if((X > Window->Layer.X2-(2*2)-GRAPHICS_WINDOW_TITLEBARSIZE) && (X < Window->Layer.X2-(2*2)-GRAPHICS_WINDOW_TITLEBARSIZE+GRAPHICS_WINDOW_XBUTTONWIDTH) && (Y > Window->Layer.Y1+2+3) && (Y < Window->Layer.Y1+2+3+GRAPHICS_WINDOW_XBUTTONHEIGHT)) {
-        		Window::DeleteWindow(Window);
-			}
+		    Window::ChangeWindowToTop(Window);
         	if(Y-Window->Layer.Y1 < GRAPHICS_WINDOW_TITLEBARSIZE+5) {
 	        	Window::MoveWindow(Window , Window->Layer.X1+DX , Window->Layer.Y1+DY);
-	        	if(Window::GetWindowPriority(Window) < WindowManager.WindowCount) {
-	        		Window::ChangeWindowToTop(Window);
-	        	}
-	        }
-	        else if(Window::GetWindowPriority(Window) < WindowManager.WindowCount) {
-	        	Window::ChangeWindowToTop(Window);
+	        	if((X > Window->Layer.X2-(2*2)-GRAPHICS_WINDOW_TITLEBARSIZE) && (X < Window->Layer.X2-(2*2)-GRAPHICS_WINDOW_TITLEBARSIZE+GRAPHICS_WINDOW_XBUTTONWIDTH) && (Y > Window->Layer.Y1+2+3) && (Y < Window->Layer.Y1+2+3+GRAPHICS_WINDOW_XBUTTONHEIGHT)) {
+		        	//Tell'em this window has been removed by Window System
+		        	continue;
+				}
 	        }
         }
-        else if(Button & 0x02) {
-        	Window::CreateWindow("made by user" , WINDOW_FLAGS_DEFAULT , X , Y , 200 , 100 , RGB(255 , 255 , 255));
-        }
+
         X += DX;
         Y += DY;
         if(X <= -GRAPHICS_MOUSE_WIDTH/2) {
@@ -370,4 +374,46 @@ void MouseWindow(void) {
         }
         Window::MoveWindow(WindowManager.MouseWindow , X , Y);
     }
+}
+
+void WindowEventQueue::Initialize(int MaxSize) {
+	if(MaxSize > QUEUE_MAXSIZE) {
+        MaxSize = QUEUE_MAXSIZE;
+    }
+	this->MaxSize = MaxSize;
+	this->Rear = 0;
+	this->Front = 0;
+	this->Buffer = (WINDOWEVENT*)Memory::malloc(MaxSize*sizeof(WINDOWEVENT));
+}
+
+BOOL WindowEventQueue::CheckEmpty(void) {
+	if(Rear == Front) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL WindowEventQueue::CheckFull(void) {
+	if((Rear+1)%MaxSize == Front) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL WindowEventQueue::SendEvent(WINDOWEVENT Event) {
+	if(this->CheckFull() == TRUE) {
+		return FALSE;
+	}
+	Rear = (Rear+1)%MaxSize;
+	Buffer[Rear] = Event;
+	return TRUE;
+}
+
+BOOL WindowEventQueue::GetEvent(WINDOWEVENT *Event) {
+	if(this->CheckEmpty() == TRUE) {
+		return FALSE;
+	}
+	Front = (Front+1)%MaxSize;
+	*Event = Buffer[Front];
+	return TRUE;
 }

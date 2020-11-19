@@ -83,10 +83,6 @@ void Graphics::DrawText(LAYER *Layer , const char *Text , int X , int Y , WORD C
 	}
 }
 
-void Graphics::DrawEmptyRectangle(LAYER *Layer , int X1 , int Y1 , int X2 , int Y2 , WORD Color , int Padding) {
-	
-}
-
 void Graphics::DrawLine(LAYER *Layer , int X1 , int Y1 , int X2 , int Y2 , WORD Color) {
 	int i;
 	int X = 0;
@@ -263,7 +259,7 @@ void Graphics::DrawTaskbar(LAYER *Layer , int X , int Y , int Width , const char
 }
 
 void Graphics::DrawWindow(LAYER *Layer , int X , int Y , int Width , int Height , const char *Title , WORD BackgroundColor) {
-	const int Padding = 2;
+	const int Padding = GRAPHICS_WINDOW_PADDING;
 	const int TaskbarSize = GRAPHICS_WINDOW_TITLEBARSIZE;
 
 	const WORD TaskbarColor = WINDOW_TITLECOLOR;

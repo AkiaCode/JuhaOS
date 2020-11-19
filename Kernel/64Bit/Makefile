@@ -25,7 +25,8 @@ ShellFunctions.obj \
 Task.obj \
 RAMDisk.obj \
 FAT32.obj \
-MemoryManagement.obj
+MemoryManagement.obj \
+WindowSystemLibrary.obj
 ENTRYFILE = Entry.asm
 ASSEMBLYFILE = Assembly.asm
 

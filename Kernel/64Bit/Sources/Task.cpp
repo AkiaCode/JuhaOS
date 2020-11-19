@@ -149,6 +149,9 @@ BOOL Task::EndTask(QWORD ID) {
 
 void Task::Exit(void) {
     Task::EndTask(Task::GetCurrentTaskID());
+    while(1) {
+        ;
+    }
 }
 
 QWORD Task::ChangeIDToOffset(QWORD ID) {
