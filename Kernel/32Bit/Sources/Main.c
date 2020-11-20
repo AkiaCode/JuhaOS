@@ -74,7 +74,7 @@ void Main32(unsigned long MultibootMagic , unsigned long MultibootAddress) {
         while(1) {
             ;
         }
-    }
+    }/*
     Buffer[0] = 0xFF;
     Registers.AX = 0x4F01;
     Registers.CX = VBEMODE;
@@ -84,7 +84,7 @@ void Main32(unsigned long MultibootMagic , unsigned long MultibootAddress) {
 
     Registers.AX = 0x4F02;
     Registers.BX = VBEMODE+0x4000;
-    int32(0x10 , &(Registers));
+    int32(0x10 , &(Registers));*/
 
 
     InitPML4(0x16000);

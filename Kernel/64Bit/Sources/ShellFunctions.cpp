@@ -65,7 +65,7 @@ void Shell::Functions::mem(int argc , char **argv) {
 }
 
 void Matrix(void) {
-    static QWORD i = 0;
+    QWORD i = 0;
     int j;
     BYTE *Buffer = (BYTE*)0xB8000;
     BYTE *Memory = (BYTE*)0x000;
@@ -83,7 +83,7 @@ void Matrix(void) {
         }
 
         Y -= Count-1;
-        delay(100);
+        delay(50);
 
         for(j = 0; j < Count; j++) {
             Buffer[((Y-Count-j)*80*2)+(X*2)] = ' ';
@@ -99,7 +99,7 @@ void Matrix(void) {
 }
 
 void Shell::Functions::testmatrix(int argc , char **argv) {
-    const int MaxTaskCount = 200;
+    const int MaxTaskCount = 100;
     int i;
     QWORD ID;
     QWORD FirstID;

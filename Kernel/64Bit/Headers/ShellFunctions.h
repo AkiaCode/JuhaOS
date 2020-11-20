@@ -27,6 +27,6 @@ static Shell::CommandList ShellFunctions[] = {
     {"endtaskall" , "End all task" , Shell::Functions::endtaskall} , 
     {"tasklist" , "Get running tasks list" , Shell::Functions::tasklist} , 
     {"delay" , "Delay for millisecond" , Shell::Functions::ShellDelay} , 
-};
+}
 
 #endif

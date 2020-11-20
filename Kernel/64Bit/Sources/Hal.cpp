@@ -33,7 +33,7 @@ void Hal::InitSystem(void) {
             __asm__ ("hlt");
         }
     }
-    Window::Initialize();
+//    Window::Initialize();
     __asm__ ("sti");
     TextScreen::printf("Done\n");
 }
@@ -142,7 +142,7 @@ void delay(QWORD Millisecond) {
         return;
     }
     while(1) {
-        if(Hal::Timer::GetTickCount()-LastTick >= Millisecond*TIMER_NANOSECOND/100) {
+        if(Hal::Timer::GetTickCount()-LastTick >= Millisecond*TIMER_NANOSECOND/10) {
             break;
         }
     }

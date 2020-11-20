@@ -9,19 +9,20 @@
 JuhaOS project, started in 2020.08.24
 (C) 2017-2020. all rights reserved by Juha.
 */
-
+/*
 void WindowTask1(void);
-void WindowTask2(void);
+void WindowTask2(void);*/
 
 extern "C" void Main(void) {
-    Hal::InitSystem();
+    Hal::InitSystem();/*
     Task::CreateTask((QWORD)WindowTask1 , TASK_DEFAULT , "WindowTask#1" , "");
     Task::CreateTask((QWORD)WindowTask2 , TASK_DEFAULT , "WindowTask#2" , "");
-    Window::WindowSystem();
+    Window::WindowSystem();*/
+    Shell::Start();
     while(1) {
     	;
     }
-}
+}/*
 
 void WindowTask1(void) {
 	WINDOW *Window;
@@ -69,4 +70,4 @@ void WindowTask2(void) {
     	}
 		__asm__ ("sti");
     }
-}
+}*/
