@@ -23,8 +23,8 @@
 #pragma pack(push , 1)
 
 typedef struct {
-    DWORD AttribPlusBaseAddressLow;
-    DWORD BaseAddressHighPlusEXB;
+    unsigned long AttribPlusBaseAddressLow;
+    unsigned long BaseAddressHighPlusEXB;
 }PML4TABLEENTRY , PML4TABLEENTRY , PDPTENTRY , PAGEDIRECTORYENTRY , PAGETABLEENTRY;
 
 #pragma pack(pop)

@@ -13,6 +13,11 @@
 #define TASK_STACKSIZE 8192
 #define TASK_MAXCOUNT 1024
 
+#define TASK_PRIORITY_HIGH 0
+#define TASK_PRIORITY_MIDDLE_LOW 1
+#define TASK_PRIORITY_MIDDLE_HIGH 3
+#define TASK_PRIORITY_LOW 4
+
 #pragma pack(push , 1)
 
 namespace Task {
@@ -54,10 +59,14 @@ namespace Task {
 
         char Name[512];
         char Description[512];
+
+        int Priority;
     };
 
     class Manager {
         public:
+            int CurrentPriority;
+
             QWORD CurrentTaskID;
             QWORD NextTaskID;
             
@@ -72,7 +81,7 @@ namespace Task {
     extern "C" void SwitchRegisters(REGISTERS *Current , REGISTERS *Next);
 
     void Initialize(void);
-    QWORD CreateTask(QWORD EntryPoint , QWORD Flags , const char *Name , const char *Description);
+    QWORD CreateTask(QWORD EntryPoint , QWORD Flags , int Priority , const char *Name , const char *Description);
     BOOL EndTask(QWORD ID);
     void Exit(void);
     void SetupTaskRegisters(REGISTERS *Registers , BYTE *Stack , QWORD EntryPoint);
@@ -82,6 +91,8 @@ namespace Task {
     Task::TASKINFO *GetTaskList(void);
     DWORD GetProcessorUsing(void);
     void SwitchTask(void);
+    void SwitchTaskInInterrupt(void);
+
     QWORD ChangeIDToOffset(QWORD ID);
 
     void System(void);

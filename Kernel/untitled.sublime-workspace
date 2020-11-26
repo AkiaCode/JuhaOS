@@ -47,7 +47,7 @@
 			"file": "64Bit/Sources/WindowSystem.cpp",
 			"settings":
 			{
-				"buffer_size": 2681,
+				"buffer_size": 14328,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -56,7 +56,7 @@
 			"file": "64Bit/Headers/WindowSystem.h",
 			"settings":
 			{
-				"buffer_size": 1003,
+				"buffer_size": 2388,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -65,7 +65,7 @@
 			"file": "64Bit/Sources/Graphics.cpp",
 			"settings":
 			{
-				"buffer_size": 6586,
+				"buffer_size": 7073,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -74,7 +74,7 @@
 			"file": "64Bit/Headers/Graphics.h",
 			"settings":
 			{
-				"buffer_size": 1344,
+				"buffer_size": 1426,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -92,7 +92,7 @@
 			"file": "64Bit/Makefile",
 			"settings":
 			{
-				"buffer_size": 1791,
+				"buffer_size": 1817,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -101,7 +101,7 @@
 			"file": "64Bit/Sources/Hal.cpp",
 			"settings":
 			{
-				"buffer_size": 9552,
+				"buffer_size": 9790,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -110,7 +110,7 @@
 			"file": "64Bit/Headers/Hal.h",
 			"settings":
 			{
-				"buffer_size": 1408,
+				"buffer_size": 1451,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -136,7 +136,7 @@
 			"file": "64Bit/Sources/Common.cpp",
 			"settings":
 			{
-				"buffer_size": 2443,
+				"buffer_size": 2516,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -171,7 +171,7 @@
 			"file": "/home/juha/JuhaOS/Makefile",
 			"settings":
 			{
-				"buffer_size": 1222,
+				"buffer_size": 1226,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -189,7 +189,7 @@
 			"file": "64Bit/Sources/Main.cpp",
 			"settings":
 			{
-				"buffer_size": 587,
+				"buffer_size": 2040,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -198,7 +198,7 @@
 			"file": "64Bit/Sources/Task.cpp",
 			"settings":
 			{
-				"buffer_size": 5501,
+				"buffer_size": 6635,
 				"line_ending": "Unix"
 			}
 		},
@@ -214,7 +214,7 @@
 			"file": "64Bit/Sources/IRQ.cpp",
 			"settings":
 			{
-				"buffer_size": 641,
+				"buffer_size": 652,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -223,7 +223,7 @@
 			"file": "64Bit/Headers/Types.h",
 			"settings":
 			{
-				"buffer_size": 1435,
+				"buffer_size": 1506,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -383,15 +383,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2681,
+						"buffer_size": 14328,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1692,
-								1692
+								992,
+								992
 							]
 						],
 						"settings":
@@ -412,15 +412,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1003,
+						"buffer_size": 2388,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								950,
-								950
+								0,
+								0
 							]
 						],
 						"settings":
@@ -441,15 +441,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6586,
+						"buffer_size": 7073,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								438,
-								438
+								0,
+								0
 							]
 						],
 						"settings":
@@ -470,15 +470,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1344,
+						"buffer_size": 1426,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1283,
-								1283
+								0,
+								0
 							]
 						],
 						"settings":
@@ -527,15 +527,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1791,
+						"buffer_size": 1817,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								901,
-								901
+								0,
+								0
 							]
 						],
 						"settings":
@@ -555,15 +555,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 9552,
+						"buffer_size": 9790,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3603,
-								3603
+								0,
+								0
 							]
 						],
 						"settings":
@@ -585,15 +585,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1408,
+						"buffer_size": 1451,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1161,
-								1161
+								0,
+								0
 							]
 						],
 						"settings":
@@ -672,15 +672,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2443,
+						"buffer_size": 2516,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2443,
-								2443
+								0,
+								0
 							]
 						],
 						"settings":
@@ -787,15 +787,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1222,
+						"buffer_size": 1226,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								384,
-								384
+								0,
+								0
 							]
 						],
 						"settings":
@@ -846,20 +846,22 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 587,
+						"buffer_size": 2040,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								356,
-								356
+								0,
+								0
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -874,7 +876,7 @@
 					"semi_transient": true,
 					"settings":
 					{
-						"buffer_size": 5501,
+						"buffer_size": 6635,
 						"regions":
 						{
 						},
@@ -934,15 +936,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 641,
+						"buffer_size": 652,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								544,
-								544
+								0,
+								0
 							]
 						],
 						"settings":
@@ -964,15 +966,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1435,
+						"buffer_size": 1506,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								229,
-								229
+								0,
+								0
 							]
 						],
 						"settings":

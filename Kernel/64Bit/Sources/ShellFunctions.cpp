@@ -107,9 +107,9 @@ void Shell::Functions::testmatrix(int argc , char **argv) {
     TextScreen::EnableCursor(0xFF , 0xFF);
     Common::srand(Hal::Timer::GetTickCount());
     TextScreen::ClearScreen(0x0A);
-    delay(2000);
+    delay(1000);
     for(i = 0; i < MaxTaskCount; i++) {
-        ID = Task::CreateTask((QWORD)Matrix , TASK_DEFAULT , "MatrixTask" , "The task for matrix!");
+        ID = Task::CreateTask((QWORD)Matrix , TASK_DEFAULT , TASK_PRIORITY_LOW , "MatrixTask" , "The task for matrix");
         TaskList[i] = ID;
         delay(Common::rand()%500);
     }
@@ -236,4 +236,24 @@ void Shell::Functions::ShellDelay(int argc , char **argv) {
     Millisecond = atoi(argv[1]);
     TextScreen::printf("Delay for %dms\n" , Millisecond);
     delay(Millisecond);
+}
+
+void SpinTask(void) {
+    static QWORD i = 0;
+    QWORD ID = Task::GetCurrentTaskID();
+    BYTE *Buffer = (BYTE*)0xB8000;
+    BYTE Spin[4] = {'-' , '\\' , '|' , '/'};
+    while(1) {
+        Buffer[(80*25-(ID-TASK_MAINTASKID))*2] = Spin[i%4];
+        Buffer[(80*25-(ID-TASK_MAINTASKID))*2+1] = ((ID-TASK_MAINTASKID)%0x0A)+1;
+        i++;
+    }
+}
+
+void Shell::Functions::testtask(int argc , char **argv) {
+    QWORD TaskCount = (QWORD)atoi(argv[1]);
+    int i;
+    for(i = 0; i < TaskCount; i++)  {
+        Task::CreateTask((QWORD)SpinTask , TASK_DEFAULT , TASK_PRIORITY_LOW , "SpinTask" , "Basic spintask");
+    }
 }

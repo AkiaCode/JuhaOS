@@ -13,8 +13,8 @@ void Shell::Start(void) {
     int argc;
     BOOL Founded;
     Common::Arguments Args;
-    TextScreen::printf("JuhaOS version %s\n" , OS_VERSION);
-    TextScreen::printf("(C) 2017-2020. all rights reserved by Juha.\n\n");
+    TextScreen::printf("%s version %s\n" , OS_NAME , OS_VERSION);
+    TextScreen::printf("%s\n\n" , OS_COPYRIGHT);
     while(1) {
         TextScreen::printf("SHELL > ");
         Length = Common::gets(Buffer);
@@ -65,6 +65,14 @@ void Shell::Start(void) {
         }
         else if(strcmp(argv[0] , "cls") == 0) {
             TextScreen::printf("Sorry, but this is not a Windows.\n");
+            for(i = 0; i <= argc; i++) {
+                Memory::free(argv[i]);
+            }
+            Memory::free(argv);
+            continue;
+        }
+        else if(strcmp(argv[0] , "dissolve") == 0) {
+            TextScreen::printf("is genius\n");
             for(i = 0; i <= argc; i++) {
                 Memory::free(argv[i]);
             }

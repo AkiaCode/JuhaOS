@@ -115,7 +115,7 @@ void Window::Initialize(void) {
 	WindowManager.TopWindowPriority = -1;
 	WindowManager.Windows = (WINDOW*)Memory::malloc((WINDOW_MAXCOUNT+1)*sizeof(WINDOW));
 	WindowManager.BackgroundWindow = CreateSystemWindow("BackgroundWindow" , WINDOW_FLAGS_NO_TITLEBAR , 0 , 0 , Block->Width , Block->Height , WINDOW_DEFAULTWALLPAPERCOLOR , 0);
-	Task::CreateTask((QWORD)MouseWindow , TASK_DEFAULT , "MouseSystem" , "");
+	Task::CreateTask((QWORD)MouseWindow , TASK_DEFAULT , TASK_PRIORITY_HIGH , "MouseSystem" , "");
 	__asm__("sti");
 	delay(100);
 }
@@ -313,7 +313,7 @@ static void KeyboardController(void) {
 void Window::WindowSystem(void) {
 	WINDOWEVENT Event;
 	KeyboardQueue.Initialize(2048);
-	Task::CreateTask((QWORD)KeyboardController , TASK_SYSTEM , "MouseQueueSystem" , "");
+	Task::CreateTask((QWORD)KeyboardController , TASK_SYSTEM , TASK_PRIORITY_HIGH , "MouseQueueSystem" , "");
 	while(1) {
 		if(KeyboardQueue.CheckEmpty() != TRUE) {
 			Event.Type = WINDOW_EVENT_KEYBOARD;

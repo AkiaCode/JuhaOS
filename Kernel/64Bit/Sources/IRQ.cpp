@@ -5,7 +5,7 @@
 
 extern "C" void IRQ0_Timer(void) {
     DescriptorTables::SendToEOI(32);
-    Task::SwitchTask();
+    Task::SwitchTaskInInterrupt();
     Hal::Timer::Interrupt();
 }
 

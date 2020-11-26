@@ -14,6 +14,7 @@ namespace Shell::Functions {
     void endtaskall(int argc , char **argv);
     void tasklist(int argc , char **argv);
     void ShellDelay(int argc , char **argv);
+    void testtask(int argc , char **argv);
 }
 
 static Shell::CommandList ShellFunctions[] = {
@@ -27,6 +28,7 @@ static Shell::CommandList ShellFunctions[] = {
     {"endtaskall" , "End all task" , Shell::Functions::endtaskall} , 
     {"tasklist" , "Get running tasks list" , Shell::Functions::tasklist} , 
     {"delay" , "Delay for millisecond" , Shell::Functions::ShellDelay} , 
-}
+    {"testtask" , "Test multitasking system" , Shell::Functions::testtask} , 
+};
 
 #endif

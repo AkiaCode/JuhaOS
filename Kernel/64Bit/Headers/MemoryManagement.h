@@ -2,11 +2,10 @@
 #define _MEMORYMANAGEMENT_H_
 
 #include <Types.h>
-#include <RAMDisk.h>
 
 #define MEMORY_START 0xF0
 #define MEMORY_NEXT 0xE0
-#define MEMORY_STARTADDRESS (0xC00000+RAMDISK_MAXSIZE)
+#define MEMORY_STARTADDRESS 0xC00000
 #define MEMORY_BLOCKSIZE 256
 
 #pragma pack(push , 1)

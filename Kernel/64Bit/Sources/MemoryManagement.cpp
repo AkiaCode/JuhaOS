@@ -2,7 +2,6 @@
 #include <Hal.h>
 #include <DescriptorTables.h>
 #include <TextScreen.h>
-#include <RAMDisk.h>
 
 static Memory::Management MemoryManager;
 

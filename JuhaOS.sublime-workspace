@@ -47,7 +47,7 @@
 			"file": "Kernel/64Bit/Sources/WindowSystem.cpp",
 			"settings":
 			{
-				"buffer_size": 2681,
+				"buffer_size": 14328,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -56,7 +56,7 @@
 			"file": "Kernel/64Bit/Headers/WindowSystem.h",
 			"settings":
 			{
-				"buffer_size": 1003,
+				"buffer_size": 2388,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -65,7 +65,7 @@
 			"file": "Kernel/64Bit/Sources/Graphics.cpp",
 			"settings":
 			{
-				"buffer_size": 6586,
+				"buffer_size": 7073,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -74,7 +74,7 @@
 			"file": "Kernel/64Bit/Headers/Graphics.h",
 			"settings":
 			{
-				"buffer_size": 1344,
+				"buffer_size": 1426,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -89,20 +89,46 @@
 			}
 		},
 		{
-			"file": "Kernel/64Bit/Makefile",
+			"file": "Kernel/64Bit/Sources/Hal.cpp",
 			"settings":
 			{
-				"buffer_size": 1791,
+				"buffer_size": 9790,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "Kernel/64Bit/Sources/Hal.cpp",
+			"file": "Kernel/64Bit/Sources/FAT32.cpp",
 			"settings":
 			{
-				"buffer_size": 9552,
+				"buffer_size": 342,
 				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Kernel/64Bit/Headers/MemoryManagement.h",
+			"settings":
+			{
+				"buffer_size": 918,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Kernel/64Bit/Headers/FAT32.h",
+			"settings":
+			{
+				"buffer_size": 1098,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Kernel/64Bit/Headers/DescriptorTables.h",
+			"settings":
+			{
+				"buffer_size": 1671,
 				"line_ending": "Unix"
 			}
 		},
@@ -110,7 +136,7 @@
 			"file": "Kernel/64Bit/Headers/Hal.h",
 			"settings":
 			{
-				"buffer_size": 1408,
+				"buffer_size": 1451,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -120,6 +146,15 @@
 			"settings":
 			{
 				"buffer_size": 4660,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Kernel/64Bit/Sources/ShellFunctions.cpp",
+			"settings":
+			{
+				"buffer_size": 8127,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
@@ -136,7 +171,7 @@
 			"file": "Kernel/64Bit/Sources/Common.cpp",
 			"settings":
 			{
-				"buffer_size": 2443,
+				"buffer_size": 2516,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -171,7 +206,7 @@
 			"file": "Makefile",
 			"settings":
 			{
-				"buffer_size": 1222,
+				"buffer_size": 1226,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -186,19 +221,14 @@
 			}
 		},
 		{
+			"contents": "#include <Common.h>\n#include <TextScreen.h>\n#include <string.h>\n#include <Hal.h>\n#include <Shell.h>\n#include <Graphics.h>\n#include <WindowSystem.h>X\n/*\nJuhaOS project, started in 2020.08.24\n(C) 2017-2020. all rights reserved by Juha.\n*/\n\n/*\nvoid WindowTask1(void);\nvoid WindowTask2(void);*/\n\nextern \"C\" void Main(void) {\n    Hal::InitSystem();/*\n    Task::CreateTask((QWORD)WindowTask1 , TASK_DEFAULT , \"WindowTask#1\" , \"\");\n    Task::CreateTask((QWORD)WindowTask2 , TASK_DEFAULT , \"WindowTask#2\" , \"\");\n    Window::WindowSystem();*/\n    Shell::Start();\n    while(1) {\n    \t;\n    }\n}/*\n\nvoid WindowTask1(void) {\n\tWINDOW *Window;\n\tWINDOWEVENT *Event;\n\tBYTE String[2] = {0 , };\n\tint i = 0;\n    Window = Window::CreateWindow(\"Window #1\" , WINDOW_FLAGS_DEFAULT , 100 , 100 , 200 , 100 , RGB(255 , 255 , 255));\n    while(1) {\n    \t__asm__ (\"cli\");\n    \tif(Window->EventQueue.GetEvent(Event) == FALSE) {\n    \t\t;\n    \t}\n    \telse if(Event->Type == WINDOW_EVENT_KEYBOARD) {\n    \t\tString[0] = Event->KeyboardData;\n    \t\tif(String[0] == '\\n') {\n    \t\t\tWindow::DrawRectangle(Window , 10 , 10 , 10+(i*FONT_CONSOLAS_WIDTH) , 10+FONT_CONSOLAS_HEIGHT , Window->BackgroundColor);\n    \t\t\ti = 0;\n    \t\t}\n    \t\tWindow::DrawText(Window , String , 10+(i*FONT_CONSOLAS_WIDTH) , 10 , 0x00);\n    \t\ti++;\n    \t}\n\t\t__asm__ (\"sti\");\n    }\n}\n\nvoid WindowTask2(void) {\n\tWINDOW *Window;\n\tWINDOWEVENT *Event;\n\tBYTE String[2] = {0 , };\n\tint i = 0;\n    Window = Window::CreateWindow(\"Window #2\" , WINDOW_FLAGS_DEFAULT , 150 , 150 , 200 , 100 , RGB(255 , 255 , 255));\n    while(1) {\n    \t__asm__ (\"cli\");\n    \tif(Window->EventQueue.GetEvent(Event) == FALSE) {\n    \t\t;\n    \t}\n    \telse if(Event->Type == WINDOW_EVENT_KEYBOARD) {\n    \t\tString[0] = Event->KeyboardData;\n    \t\tif(String[0] == '\\n') {\n    \t\t\tWindow::DrawRectangle(Window , 10 , 10 , 10+(i*FONT_CONSOLAS_WIDTH) , 10+FONT_CONSOLAS_HEIGHT , Window->BackgroundColor);\n    \t\t\ti = 0;\n    \t\t}\n    \t\tWindow::DrawText(Window , String , 10+(i*FONT_CONSOLAS_WIDTH) , 10 , 0x00);\n    \t\ti++;\n    \t}\n\t\t__asm__ (\"sti\");\n    }\n}*/",
 			"file": "Kernel/64Bit/Sources/Main.cpp",
+			"file_size": 2040,
+			"file_write_time": 132507809524033172,
 			"settings":
 			{
-				"buffer_size": 587,
+				"buffer_size": 2041,
 				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "Kernel/64Bit/Sources/Task.cpp",
-			"settings":
-			{
-				"buffer_size": 5501,
 				"line_ending": "Unix"
 			}
 		},
@@ -214,7 +244,7 @@
 			"file": "Kernel/64Bit/Sources/IRQ.cpp",
 			"settings":
 			{
-				"buffer_size": 641,
+				"buffer_size": 652,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -223,7 +253,16 @@
 			"file": "Kernel/64Bit/Headers/Types.h",
 			"settings":
 			{
-				"buffer_size": 1435,
+				"buffer_size": 1598,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Kernel/64Bit/Sources/Shell.cpp",
+			"settings":
+			{
+				"buffer_size": 2884,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -240,6 +279,10 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"Menu",
+				"View: Toggle Menu"
+			],
 			[
 				"package install",
 				"Package Control: Install Package"
@@ -280,15 +323,25 @@
 		"side_bar_visible": true,
 		"status_bar_visible": false
 	},
+	"expanded_folders":
+	[
+		"/home/juha/JuhaOS",
+		"/home/juha/JuhaOS/Kernel",
+		"/home/juha/JuhaOS/Kernel/32Bit",
+		"/home/juha/JuhaOS/Kernel/64Bit",
+		"/home/juha/JuhaOS/Kernel/64Bit/Headers",
+		"/home/juha/JuhaOS/Kernel/64Bit/Sources"
+	],
 	"file_history":
 	[
+		"/home/juha/JuhaOS/Kernel/64Bit/Makefile",
+		"/home/juha/JuhaOS/Kernel/64Bit/Sources/MemoryManagement.cpp",
 		"/home/juha/JuhaOS/Kernel/untitled.sublime-project",
 		"/home/juha/JuhaOS/Kernel/64Bit/Sources/Task.cpp",
 		"/home/juha/JuhaOS/Kernel/64Bit/Headers/Layer.h",
 		"/home/juha/JuhaOS/Kernel/64Bit/Sources/Layer.cpp",
 		"/home/juha/JuhaOS/Kernel/CUI32Bit/Makefile",
 		"/home/juha/JuhaOS/Kernel/CUI32Bit/Sources/Main.c",
-		"/home/juha/JuhaOS/Kernel/64Bit/Makefile",
 		"/home/juha/JuhaOS/Kernel/32Bit/Sources/Main.c",
 		"/home/juha/JuhaOS/Kernel/32Bit/Sources/Paging.c",
 		"/home/juha/JuhaOS/Kernel/64Bit/Sources/Font.h",
@@ -336,6 +389,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			";\n",
 			"->BYSize",
 			"->BXSize",
 			"UpdateLayerSub",
@@ -374,7 +428,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 7,
 			"sheets":
 			[
 				{
@@ -383,26 +437,27 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2681,
+						"buffer_size": 14328,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2216,
-								2216
+								1462,
+								1462
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 663.0,
+						"translation.y": 816.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 19,
 					"type": "text"
 				},
 				{
@@ -411,15 +466,73 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1003,
+						"buffer_size": 2388,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								950,
-								950
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 22,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "Kernel/64Bit/Sources/Graphics.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7073,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								495,
+								495
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "Kernel/64Bit/Headers/Graphics.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1426,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
 							]
 						],
 						"settings":
@@ -435,63 +548,6 @@
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "Kernel/64Bit/Sources/Graphics.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6586,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								438,
-								438
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "Kernel/64Bit/Headers/Graphics.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1344,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1283,
-								1283
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
 					"buffer": 4,
 					"file": "Kernel/64Bit/Headers/Shell.h",
 					"semi_transient": false,
@@ -504,8 +560,66 @@
 						"selection":
 						[
 							[
-								321,
-								321
+								269,
+								269
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "Kernel/64Bit/Sources/Hal.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9790,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								137,
+								137
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 20,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "Kernel/64Bit/Sources/FAT32.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 342,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								342,
+								342
 							]
 						],
 						"settings":
@@ -520,78 +634,20 @@
 					"type": "text"
 				},
 				{
-					"buffer": 5,
-					"file": "Kernel/64Bit/Makefile",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1791,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								901,
-								901
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Makefile/Makefile.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "Kernel/64Bit/Sources/Hal.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9552,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3603,
-								3603
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1989.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
 					"buffer": 7,
-					"file": "Kernel/64Bit/Headers/Hal.h",
+					"file": "Kernel/64Bit/Headers/MemoryManagement.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1408,
+						"buffer_size": 918,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1161,
-								1161
+								347,
+								347
 							]
 						],
 						"settings":
@@ -601,14 +657,103 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 17.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 12,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
 					"buffer": 8,
+					"file": "Kernel/64Bit/Headers/FAT32.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1098,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								17,
+								17
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "Kernel/64Bit/Headers/DescriptorTables.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1671,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1671,
+								1671
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 17,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "Kernel/64Bit/Headers/Hal.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1451,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1451,
+								1451
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 18,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
 					"file": "Kernel/64Bit/Sources/string.cpp",
 					"semi_transient": false,
 					"settings":
@@ -633,11 +778,41 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 16,
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 12,
+					"file": "Kernel/64Bit/Sources/ShellFunctions.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8127,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								628,
+								628
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 51.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 21,
+					"type": "text"
+				},
+				{
+					"buffer": 13,
 					"file": "Kernel/grub.cfg",
 					"semi_transient": false,
 					"settings":
@@ -649,8 +824,8 @@
 						"selection":
 						[
 							[
-								27,
-								27
+								193,
+								193
 							]
 						],
 						"settings":
@@ -661,24 +836,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 19,
+					"stack_index": 15,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
+					"buffer": 14,
 					"file": "Kernel/64Bit/Sources/Common.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2443,
+						"buffer_size": 2516,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2443,
-								2443
+								1329,
+								1329
 							]
 						],
 						"settings":
@@ -688,14 +863,14 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1377.0,
+						"translation.y": 971.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 17,
+					"stack_index": 14,
 					"type": "text"
 				},
 				{
-					"buffer": 11,
+					"buffer": 15,
 					"file": "Kernel/64Bit/Headers/Common.h",
 					"semi_transient": false,
 					"settings":
@@ -707,8 +882,8 @@
 						"selection":
 						[
 							[
-								16,
-								16
+								87,
+								87
 							]
 						],
 						"settings":
@@ -720,11 +895,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 16,
+					"stack_index": 13,
 					"type": "text"
 				},
 				{
-					"buffer": 12,
+					"buffer": 16,
 					"file": "Kernel/64Bit/Headers/ISR.h",
 					"semi_transient": false,
 					"settings":
@@ -748,11 +923,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 18,
+					"stack_index": 23,
 					"type": "text"
 				},
 				{
-					"buffer": 13,
+					"buffer": 17,
 					"file": "Kernel/64Bit/Headers/Math.h",
 					"semi_transient": false,
 					"settings":
@@ -776,24 +951,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 15,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 14,
+					"buffer": 18,
 					"file": "Makefile",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1222,
+						"buffer_size": 1226,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								384,
-								384
+								362,
+								362
 							]
 						],
 						"settings":
@@ -805,11 +980,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 14,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 15,
+					"buffer": 19,
 					"file": "Kernel/64Bit/Sources/Entry.asm",
 					"semi_transient": false,
 					"settings":
@@ -835,52 +1010,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 20,
+					"stack_index": 24,
 					"type": "text"
 				},
 				{
-					"buffer": 16,
+					"buffer": 20,
 					"file": "Kernel/64Bit/Sources/Main.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 587,
+						"buffer_size": 2041,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								356,
-								356
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 17,
-					"file": "Kernel/64Bit/Sources/Task.cpp",
-					"semi_transient": true,
-					"settings":
-					{
-						"buffer_size": 5501,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
+								912,
+								912
 							]
 						],
 						"settings":
@@ -893,11 +1040,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 18,
+					"buffer": 21,
 					"file": "Kernel/64Bit/Sources/TextScreen.cpp",
 					"semi_transient": false,
 					"settings":
@@ -923,24 +1070,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 13,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
-					"buffer": 19,
+					"buffer": 22,
 					"file": "Kernel/64Bit/Sources/IRQ.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 641,
+						"buffer_size": 652,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								544,
-								544
+								514,
+								514
 							]
 						],
 						"settings":
@@ -953,24 +1100,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
-					"buffer": 20,
+					"buffer": 23,
 					"file": "Kernel/64Bit/Headers/Types.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1435,
+						"buffer_size": 1598,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								229,
-								229
+								475,
+								475
 							]
 						],
 						"settings":
@@ -978,10 +1125,40 @@
 							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 306.0,
+						"translation.y": 119.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 24,
+					"file": "Kernel/64Bit/Sources/Shell.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2884,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								378,
+								378
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
 					"type": "text"
 				}
 			]
@@ -1017,7 +1194,7 @@
 			1.0
 		]
 	},
-	"menu_visible": false,
+	"menu_visible": true,
 	"output.find_results":
 	{
 		"height": 0.0
@@ -1067,7 +1244,7 @@
 	"show_minimap": false,
 	"show_open_files": true,
 	"show_tabs": true,
-	"side_bar_visible": false,
+	"side_bar_visible": true,
 	"side_bar_width": 273.0,
 	"status_bar_visible": true,
 	"template_settings":

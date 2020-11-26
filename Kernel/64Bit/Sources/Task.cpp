@@ -24,15 +24,16 @@ void Task::Initialize(void) {
     TaskManager.Tasks[0].Flags = TASK_SYSTEM;
     TaskManager.Tasks[0].Using = TRUE;
     TaskManager.Tasks[0].Stack = 0x00;
+    TaskManager.Tasks[0].Priority = TASK_PRIORITY_HIGH;
     strcpy(TaskManager.Tasks[0].Name , "MAIN");
     strcpy(TaskManager.Tasks[0].Description , "This is kernel system, DO NOT TOUCH IT");
     SetupTaskRegisters(&(TaskManager.Tasks[0].Registers) , 0x00 , 0x00);
     __asm__ ("sti");
-    CreateTask((QWORD)IDLE , TASK_SYSTEM , "SYSTEM" , "A task for control/manage the system");
-    CreateTask((QWORD)System , TASK_SYSTEM , "IDLE" , "IDLE task");
+    CreateTask((QWORD)IDLE , TASK_SYSTEM , TASK_PRIORITY_HIGH , "SYSTEM" , "A task for control/manage the system");
+    CreateTask((QWORD)System , TASK_SYSTEM , TASK_PRIORITY_HIGH , "IDLE" , "IDLE task");
 }
 
-QWORD Task::CreateTask(QWORD EntryPoint , QWORD Flags , const char *Name , const char *Description) {
+QWORD Task::CreateTask(QWORD EntryPoint , QWORD Flags , int Priority , const char *Name , const char *Description) {
     int i;
     QWORD ID;
     __asm__ ("cli");
@@ -46,6 +47,7 @@ QWORD Task::CreateTask(QWORD EntryPoint , QWORD Flags , const char *Name , const
             break;
         }
     }
+    TaskManager.Tasks[i].Priority = Priority;
     ID = TaskManager.Tasks[i].ID;
     strcpy(TaskManager.Tasks[i].Name , Name);
     strcpy(TaskManager.Tasks[i].Description , Description);
@@ -95,6 +97,31 @@ Task::TASKINFO Task::GetTaskInfo(QWORD ID) {
 }
 
 void Task::SwitchTask(void) {
+    QWORD CurrentTaskIndex = TaskManager.CurrentTaskIndex;
+    QWORD NextTaskIndex = TaskManager.NextTaskIndex;
+    char *ContextAddress = (char*)IST_STARTADDRESS+IST_SIZE-sizeof(REGISTERS);
+    __asm__ ("cli");
+    if(TaskManager.TaskCount == 1) {
+        __asm__ ("sti");
+        return;
+    }
+    TaskManager.CurrentTaskIndex++;
+    TaskManager.NextTaskIndex++;
+    if(TaskManager.CurrentTaskIndex >= TaskManager.TaskCount) {
+        TaskManager.CurrentTaskIndex = 0x00;
+    }
+    if(TaskManager.NextTaskIndex >= TaskManager.TaskCount) {
+        TaskManager.NextTaskIndex = 0x00;
+    }
+    if((TaskManager.Tasks[TaskManager.NextTaskIndex].Flags == TASK_NONE)||(TaskManager.Tasks[TaskManager.NextTaskIndex].Using == FALSE)) {
+        __asm__ ("sti");
+        return;
+    }
+    SwitchRegisters(&(TaskManager.Tasks[CurrentTaskIndex].Registers) , &(TaskManager.Tasks[NextTaskIndex].Registers));
+    __asm__ ("sti");
+}
+
+void Task::SwitchTaskInInterrupt(void) {
     QWORD CurrentTaskIndex = TaskManager.CurrentTaskIndex;
     QWORD NextTaskIndex = TaskManager.NextTaskIndex;
     char *ContextAddress = (char*)IST_STARTADDRESS+IST_SIZE-sizeof(REGISTERS);

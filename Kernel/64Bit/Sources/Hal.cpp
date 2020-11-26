@@ -22,17 +22,17 @@ void Hal::InitSystem(void) {
     TextScreen::printf("Loading : ");
     DescriptorTables::Initialize();
     Hal::Keyboard::Initialize();
-    Hal::Mouse::Initialize();
+//    Hal::Mouse::Initialize(); // we're not gonna use this in console mode, ok?
     Memory::Initialize();
     Task::Initialize();
-    Hal::Timer::Initialize();
+    Hal::Timer::Initialize();/*
     RAMDisk::Initialize(RAMDISK_MAXSIZE);
     if(FAT32::Initialize() == FALSE) {
         __asm__ ("cli");
         while(1) {
             __asm__ ("hlt");
         }
-    }
+    }*/
 //    Window::Initialize();
     __asm__ ("sti");
     TextScreen::printf("Done\n");
@@ -138,14 +138,18 @@ void Hal::Timer::Interrupt(void) {
 void delay(QWORD Millisecond) {
     int i;
     QWORD LastTick = Hal::Timer::GetTickCount();
+    __asm__ ("cli");
     if(TimerController.Initialized == FALSE) {
+        __asm__ ("sti");
         return;
     }
     while(1) {
         if(Hal::Timer::GetTickCount()-LastTick >= Millisecond*TIMER_NANOSECOND/10) {
             break;
         }
+        Task::SwitchTask();
     }
+    __asm__ ("sti");
 }
 
 void Hal::Mouse::ProcessAndPutToQueue(BYTE Code) {
@@ -158,7 +162,9 @@ void Hal::Mouse::ProcessAndPutToQueue(BYTE Code) {
 BOOL Hal::Mouse::GetMouseData(int *X , int *Y , int *Button) {
     BYTE Code = MouseController.Queue.Dequeue();
     if(MouseController.Phase == 0) {
-        MouseController.Phase = 1;
+        if(Code == 0xFA) {
+            MouseController.Phase = 1;
+        }
         return FALSE; 
     }
     if(MouseController.Phase == 1) {
@@ -293,6 +299,7 @@ BYTE getch(void) {
 				break;
 			}
 		}
+        Task::SwitchTask();
 	}
 	return ASCIICode;
 }
