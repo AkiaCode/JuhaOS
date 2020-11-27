@@ -9,9 +9,9 @@ typedef unsigned long long QWORD;
 typedef unsigned int size_t;
 typedef int BOOL;
 
-#define OS_NAME "Orange (tm)"
+#define OS_NAME "JuhaOS"
 #define OS_VERSION "0.1.4"
-#define OS_COPYRIGHT "(C) 2017-2020. all rights reserved by everyone who helped Juha."
+#define OS_COPYRIGHT "(C) 2017-2020. all rights reserved by Juha and everyone who helped him."
 
 #define TRUE 1
 #define FALSE 0

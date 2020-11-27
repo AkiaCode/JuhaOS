@@ -1,5 +1,4 @@
 #include <string.h>
-#include <Math.h>
 #include <stdarg.h>
 
 int SizeOfNumber(int Number);

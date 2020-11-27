@@ -10,6 +10,7 @@ namespace Shell::Functions {
     void version(int argc , char **argv);
     void mem(int argc , char **argv);
     void testmatrix(int argc , char **argv);
+    void testbruhtrix(int argc , char **argv);
     void endtask(int argc , char **argv);
     void endtaskall(int argc , char **argv);
     void tasklist(int argc , char **argv);
@@ -24,6 +25,7 @@ static Shell::CommandList ShellFunctions[] = {
     {"version" , "Get OS version" , Shell::Functions::version} , 
     {"mem" , "Check your PC's memory" , Shell::Functions::mem} , 
     {"matrix" , "M A T R I X " , Shell::Functions::testmatrix} , 
+    {"bruhtrix" , "B R U H" , Shell::Functions::testbruhtrix} , 
     {"endtask" , "End the task" , Shell::Functions::endtask} , 
     {"endtaskall" , "End all task" , Shell::Functions::endtaskall} , 
     {"tasklist" , "Get running tasks list" , Shell::Functions::tasklist} , 

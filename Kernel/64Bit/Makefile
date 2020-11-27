@@ -13,7 +13,6 @@ OCCOPTION = -m64 -O5 -mcmodel=large -ffreestanding -fno-use-cxa-atexit -nostdlib
 TARGETOBJECTS = \
 Main.obj \
 string.obj \
-Math.obj \
 Hal.obj \
 DescriptorTables.obj \
 ISR.obj \

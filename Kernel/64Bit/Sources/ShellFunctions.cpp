@@ -64,6 +64,41 @@ void Shell::Functions::mem(int argc , char **argv) {
     return;
 }
 
+void Bruhtrix(void) {
+    QWORD i = 0;
+    int j;
+    BYTE *Buffer = (BYTE*)0xB8000;
+    BYTE *Memory = (BYTE*)0x000;
+    int X = Common::rand()%80;
+    int Y = 0x00;
+    int Count = (Common::rand()%5)+2;
+    char BRUH[4] = {'B' , 'R' , 'U' , 'H'};
+    while(1) {
+        for(j = 0; j < Count; j++) {
+            Buffer[(Y*80*2)+(X*2)] = BRUH[(i++)%4];
+            Buffer[(Y*80*2)+(X*2)+1] = 0x0A;
+            if(j == Count-1) {
+                Buffer[(Y*80*2)+(X*2)+1] = 0x07;
+            }
+            Y += 1;
+        }
+
+        Y -= Count-1;
+        delay(50);
+
+        for(j = 0; j < Count; j++) {
+            Buffer[((Y-Count-j)*80*2)+(X*2)] = ' ';
+            Buffer[((Y-Count-j)*80*2)+(X*2)+1] = 0x07;
+        }
+
+        if(Y >= 25+Count) {
+            Y = 0;
+            X = Common::rand()%80;
+            Count = (Common::rand()%5)+2;
+        }
+    }
+}
+
 void Matrix(void) {
     QWORD i = 0;
     int j;
@@ -96,6 +131,33 @@ void Matrix(void) {
             Count = (Common::rand()%5)+2;
         }
     }
+}
+
+void Shell::Functions::testbruhtrix(int argc , char **argv) {
+    const int MaxTaskCount = 100;
+    int i;
+    QWORD ID;
+    QWORD FirstID;
+    QWORD TaskList[200];
+    TextScreen::EnableCursor(0xFF , 0xFF);
+    Common::srand(Hal::Timer::GetTickCount());
+    TextScreen::ClearScreen(0x0A);
+    delay(1000);
+    for(i = 0; i < MaxTaskCount; i++) {
+        ID = Task::CreateTask((QWORD)Bruhtrix , TASK_DEFAULT , TASK_PRIORITY_LOW , "BruhtrixTask" , "The task for bruhtrix");
+        TaskList[i] = ID;
+        delay(Common::rand()%500);
+    }
+    while(1) {
+        if(getch() == '\b') {
+            break;
+        }
+    }
+    for(i = 0; i < MaxTaskCount; i++) {
+        Task::EndTask(TaskList[i]);
+    }
+    TextScreen::EnableCursor(0x00 , 0xFF);
+    TextScreen::SetColor(0x07);
 }
 
 void Shell::Functions::testmatrix(int argc , char **argv) {
@@ -243,8 +305,11 @@ void SpinTask(void) {
     QWORD ID = Task::GetCurrentTaskID();
     BYTE *Buffer = (BYTE*)0xB8000;
     BYTE Spin[4] = {'-' , '\\' , '|' , '/'};
+    int Seed;
+    Common::srand(Hal::Timer::GetTickCount());
+    Seed = Common::rand()%2;
     while(1) {
-        Buffer[(80*25-(ID-TASK_MAINTASKID))*2] = Spin[i%4];
+        Buffer[(80*25-(ID-TASK_MAINTASKID))*2] = (Seed == 1) ? (Spin[i%4]):(Common::rand()%255);
         Buffer[(80*25-(ID-TASK_MAINTASKID))*2+1] = ((ID-TASK_MAINTASKID)%0x0A)+1;
         i++;
     }
